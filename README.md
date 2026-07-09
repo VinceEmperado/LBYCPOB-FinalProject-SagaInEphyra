@@ -16,21 +16,17 @@ The main target audience of this project are those who suffer from ADHD or other
 
 # Core OOP Concepts
 
-Encapsulation - Private attributes for playable characters and enemy characters. Playable characters will have basic attacks, a skill, and an ultimate.
-Inheritance - Character -> NameOfSpecificCharacter
-Polymorphism - Abstract class Character will have abstract methods basic attack, skill, and ultimate, which will be overriden when used by specific characdters
-Abstraction - Interfaces Playable and Enemy will categorize characters into two: ones that can be harmed by basic attacks, skills, and ultimates from the playables, as well as playable characters that will only have a single-digit number of hitpoints.
+- Encapsulation - Private attributes for playable characters and enemy characters. Playable characters will have basic attacks, a skill, and an ultimate.
+- Inheritance - Character -> NameOfSpecificCharacter
+- Polymorphism - Abstract class Character will have abstract methods basic attack, skill, and ultimate, which will be overriden when used by specific characdters
+- Abstraction - Interfaces Playable and Enemy will categorize characters into two: ones that can be harmed by basic attacks, skills, and ultimates from the playables, as well as playable characters that will only have a single-digit number of hitpoints.
 
 # Initial Class Ideas
 
-Character - This is an abstract class that will have attributes basic attack, skill, and ultimate
-Playable - This will be an interface, and it will have methods that allow users to control the character
-Enemy - This will be an interface, and it will have methods that allow a character to harm the playable character, move randomly, and will have attack patterns
-Bullet - These will be the objects that will harm the playable character if it makes contact with their hitbox
-
-
-
-
+- Character - This is an abstract class that will have attributes basic attack, skill, and ultimate
+- Playable - This will be an interface, and it will have methods that allow users to control the character
+- Enemy - This will be an interface, and it will have methods that allow a character to harm the playable character, move randomly, and will have attack patterns
+- Bullet - These will be the objects that will harm the playable character if it makes contact with their hitbox
 
 ![Image of Touhou 7: Perfect Cherry Blossom, one of the inspirations for this project](https://upload.wikimedia.org/wikipedia/en/a/a4/TH07_PCB_Interface.jpg)
 
