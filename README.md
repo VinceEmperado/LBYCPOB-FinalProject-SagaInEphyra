@@ -1,5 +1,7 @@
 # LBYCPOB-FinalProject-SagaInEphyra
 
+# Saga in Ephyra: A Bullet Hell Game
+
 **Solo project by Vince Delphine C. Emperado - VinceEmperado**
 
 # Problem Statement and Goals
@@ -26,7 +28,7 @@ The main target audience of this project are those who suffer from ADHD or other
 - Character - This is an abstract class that will have attributes attack, skill, ultimate, hitpoints, and hitbox.
 - Playable - This will be an interface, and it will have methods that allow users to control the character. Classes that implement this will start with 3 hitpoints.
 - Enemy - This will be an interface, and it will have methods that allow a character to harm the playable character, move randomly, and will have attack patterns. The classes that implement this will have an HP bar which the players must deplete by attacking them.
-- Bullet - These will be the objects that will harm the playable character if it makes contact with their hitbox
+- Bullet - These will be the objects that will harm the playable character if it makes contact with their hitbox. There are different types of bullets, such as ones that follow the player, laser beams, and many others.
 
 ![Image of Touhou 7: Perfect Cherry Blossom, one of the inspirations for this project](https://upload.wikimedia.org/wikipedia/en/a/a4/TH07_PCB_Interface.jpg)
 
