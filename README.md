@@ -28,5 +28,10 @@ Playable - This will be an interface, and it will have methods that allow users 
 Enemy - This will be an interface, and it will have methods that allow a character to harm the playable character, move randomly, and will have attack patterns
 Bullet - These will be the objects that will harm the playable character if it makes contact with their hitbox
 
+
+
+
+
 ![Image of Touhou 7: Perfect Cherry Blossom, one of the inspirations for this project](https://upload.wikimedia.org/wikipedia/en/a/a4/TH07_PCB_Interface.jpg)
+
 NOTE: This image is from the 7th Touhou Project game by ZUN called Touhou 7: Perfect Cherry Blossom. The game series is one of the main inspirations for this project.
