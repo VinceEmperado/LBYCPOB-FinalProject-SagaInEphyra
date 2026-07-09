@@ -10,6 +10,10 @@ Many people in the world find it difficult, if not are completely unable to, foc
 
 This project is inspired by other bullet hell games such as UNDERTALE and DELTARUNE by Toby Fox, Cuphead by Studio MDHR, and the Touhou Project by ZUN. It will be a boss-rush type bullet hell, where the goal of the players is to defeat bosses while attacking them and dodging their bullets. Players will only have three hitpoints, with some "1-UP" items that increase this number by 1. Every time the player gets hit, there will be invincibility frames for a set number of seconds that will make bullets unable to hit the character.
 
+# Target Users
+
+The main target audience of this project are those who suffer from ADHD or other conditions that make it difficult for them to focus on something like meetings and the completion of their coursework.
+
 # Core OOP Concepts
 
 Encapsulation - Private attributes for playable characters and enemy characters. Playable characters will have basic attacks, a skill, and an ultimate.
@@ -23,3 +27,5 @@ Character - This is an abstract class that will have attributes basic attack, sk
 Playable - This will be an interface, and it will have methods that allow users to control the character
 Enemy - This will be an interface, and it will have methods that allow a character to harm the playable character, move randomly, and will have attack patterns
 Bullet - These will be the objects that will harm the playable character if it makes contact with their hitbox
+
+![Image of Touhou 7: Perfect Cherry Blossom, one of the inspirations for this project](https://upload.wikimedia.org/wikipedia/en/a/a4/TH07_PCB_Interface.jpg)
