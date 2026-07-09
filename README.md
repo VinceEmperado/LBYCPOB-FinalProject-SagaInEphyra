@@ -23,9 +23,9 @@ The main target audience of this project are those who suffer from ADHD or other
 
 # Initial Class Ideas
 
-- Character - This is an abstract class that will have attributes basic attack, skill, and ultimate
-- Playable - This will be an interface, and it will have methods that allow users to control the character
-- Enemy - This will be an interface, and it will have methods that allow a character to harm the playable character, move randomly, and will have attack patterns
+- Character - This is an abstract class that will have attributes attack, skill, ultimate, hitpoints, and hitbox.
+- Playable - This will be an interface, and it will have methods that allow users to control the character. Classes that implement this will start with 3 hitpoints.
+- Enemy - This will be an interface, and it will have methods that allow a character to harm the playable character, move randomly, and will have attack patterns. The classes that implement this will have an HP bar which the players must deplete by attacking them.
 - Bullet - These will be the objects that will harm the playable character if it makes contact with their hitbox
 
 ![Image of Touhou 7: Perfect Cherry Blossom, one of the inspirations for this project](https://upload.wikimedia.org/wikipedia/en/a/a4/TH07_PCB_Interface.jpg)
