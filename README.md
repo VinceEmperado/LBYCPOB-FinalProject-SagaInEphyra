@@ -2,7 +2,10 @@
 
 # Saga in Ephyra: A Bullet Hell Game
 
-**Solo project by Vince Delphine C. Emperado - VinceEmperado**
+# Team Members:
+Vince Delphine C. Emperado (E21) - VinceEmperado
+Jude Daniel F. Tungol (E23) - mzkakym
+Matthew B. Ylanan (E23) - matthewylanan-sirius
 
 # Problem Statement and Goals
 
@@ -33,3 +36,15 @@ The main target audience of this project are those who suffer from ADHD or other
 ![Image of Touhou 7: Perfect Cherry Blossom, one of the inspirations for this project](https://upload.wikimedia.org/wikipedia/en/a/a4/TH07_PCB_Interface.jpg)
 
 NOTE: This image is from the 7th Touhou Project game by ZUN called Touhou 7: Perfect Cherry Blossom. The game series is one of the main inspirations for this project.
+
+# User Stories
+
+- As a person who struggles to focus, I want to play the bullet hell stages so that I can practice maintaining my attention span
+- As a player, I want the game to gradually become
+- As a player, I want clear visual feedbacks whenever I get hit so that I can immediately recognize my mistakes and improve for my next run
+- As a player, I want to see my previous scores so I can monitor my improvement
+- As a player, I want bosses with unique attack patterns so that I stay engaged while training my focus
+
+# Core Features
+- Leaderboard system using local scores
+- Account system for saving scores for multiple users
