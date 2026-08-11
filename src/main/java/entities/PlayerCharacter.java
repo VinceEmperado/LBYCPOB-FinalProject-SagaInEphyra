@@ -12,6 +12,7 @@ public class PlayerCharacter {
         this.y = startY;
     }
 
+    // Updates the position of the playable character.
     public void update(double delta, boolean up, boolean down, boolean left, boolean right, int panelWidth, int panelHeight, boolean slowDown) {
         if (slowDown) {
             this.speed = 200;
@@ -35,11 +36,13 @@ public class PlayerCharacter {
         y = Math.clamp(y, 0, panelHeight - height);
     }
 
+    // Renders the hitbox of the playable character in the window
     public void render(Graphics2D g2d) {
         g2d.setColor(Color.GREEN);
         g2d.fillRect((int) x, (int) y, width, height);
     }
 
+    // Getters
     public double getX() {
         return x;
     }
