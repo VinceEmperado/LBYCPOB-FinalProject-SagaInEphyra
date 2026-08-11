@@ -12,7 +12,12 @@ public class PlayerCharacter {
         this.y = startY;
     }
 
-    public void update(double delta, boolean up, boolean down, boolean left, boolean right, int panelWidth, int panelHeight) {
+    public void update(double delta, boolean up, boolean down, boolean left, boolean right, int panelWidth, int panelHeight, boolean slowDown) {
+        if (slowDown) {
+            this.speed = 200;
+        } else {
+            this.speed = 300;
+        }
         if (up) {
             y -= speed * delta;
         }
