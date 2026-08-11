@@ -42,7 +42,7 @@ public class GameLoopManager implements Runnable{
     }
 
     private void update(double delta) {
-        playerCharacter.update(delta, gamePanel.isUp(), gamePanel.isDown());
+        playerCharacter.update(delta, gamePanel.isUp(), gamePanel.isDown(), gamePanel.isLeft(), gamePanel.isRight(), gamePanel.getWidth(), gamePanel.getHeight());
     }
 
     private void sleepUntilNextFrame() {

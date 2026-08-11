@@ -12,16 +12,22 @@ public class PlayerCharacter {
         this.y = startY;
     }
 
-    public void update(double delta, boolean up, boolean down) {
+    public void update(double delta, boolean up, boolean down, boolean left, boolean right, int panelWidth, int panelHeight) {
         if (up) {
             y -= speed * delta;
         }
         if (down) {
             y += speed * delta;
         }
+        if (left) {
+            x -= speed * delta;
+        }
+        if (right) {
+            x += speed * delta;
+        }
 
-        x = Math.clamp(x, 0, 800 - width);
-        y = Math.clamp(y, 0, 600 - height);
+        x = Math.clamp(x, 0, panelWidth - width);
+        y = Math.clamp(y, 0, panelHeight - height);
     }
 
     public void render(Graphics2D g2d) {

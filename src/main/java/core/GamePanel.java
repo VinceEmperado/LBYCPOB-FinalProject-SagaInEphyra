@@ -5,6 +5,7 @@ import entities.PlayerCharacter;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
 public class GamePanel extends JPanel {
     private boolean up, down, left, right;
@@ -29,8 +30,8 @@ public class GamePanel extends JPanel {
         ActionMap actionMap = getActionMap();
 
         // Map W to make the player entity move upwards.
-        inputMap.put(KeyStroke.getKeyStroke("pressed W"), "moveUpPressed");
-        inputMap.put(KeyStroke.getKeyStroke("released W"), "moveUpReleased");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_W, 0, false), "moveUpPressed");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_W, 0, true), "moveUpReleased");
         actionMap.put("moveUpPressed", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -45,8 +46,8 @@ public class GamePanel extends JPanel {
         });
 
         // Map S to make the player entity move down
-        inputMap.put(KeyStroke.getKeyStroke("pressed S"), "moveDownPressed");
-        inputMap.put(KeyStroke.getKeyStroke("released S"), "moveDownReleased");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0, false), "moveDownPressed");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, 0, true), "moveDownReleased");
         actionMap.put("moveDownPressed", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -60,6 +61,37 @@ public class GamePanel extends JPanel {
             }
         });
 
+        // Map A to make the player entity move left
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, 0, false), "moveLeftPressed");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, 0, true), "moveLeftReleased");
+        actionMap.put("moveLeftPressed", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                left = true;
+            }
+        });
+        actionMap.put("moveLeftReleased", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                left = false;
+            }
+        });
+
+        // Map D to make the player entity move right
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, 0, false), "moveRightPressed");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, 0, true), "moveRightReleased");
+        actionMap.put("moveRightPressed", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                right = true;
+            }
+        });
+        actionMap.put("moveRightReleased", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                right = false;
+            }
+        });
     }
     public boolean isUp() {
         return up;
@@ -69,4 +101,11 @@ public class GamePanel extends JPanel {
         return down;
     }
 
+    public boolean isLeft() {
+        return left;
+    }
+
+    public boolean isRight() {
+        return right;
+    }
 }
