@@ -1,27 +1,39 @@
 package core;
 
+import entities.PlayerCharacter;
+
 import javax.swing.*;
 
 public class GameLauncher extends JFrame {
     public static void main(String[] args) {
-        // Creates the window object, the title at the top bar will be Saga in Ephyra
-        JFrame gameFrame = new JFrame("Saga in Ephyra");
+        SwingUtilities.invokeLater(() -> {
+            PlayerCharacter player = new PlayerCharacter(390, 500);
+            GamePanel gamePanel = new GamePanel(player);
+            GameLoopManager loopManager = new GameLoopManager(gamePanel, player);
 
-        // Ensures that the window will close whenever the X button is pressed
-        gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            // Creates the window object, the title at the top bar will be Saga in Ephyra
+            JFrame gameFrame = new JFrame("Saga in Ephyra");
 
-        // Set the dimensions of the window, in this case it will be 800x600
-        gameFrame.setSize(800, 600);
+            // Ensures that the window will close whenever the X button is pressed
+            gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // The will force the window to stay on the same size, the user will not be able to resize it
-        gameFrame.setResizable(false);
+            // Set the dimensions of the window, in this case it will be 800x600
+            gameFrame.setSize(800, 600);
 
-        // Centers the window on the screen
-        gameFrame.setLocationRelativeTo(null);
+            // The will force the window to stay on the same size, the user will not be able to resize it
+            gameFrame.setResizable(false);
 
-        // Makes the window visible
-        gameFrame.setVisible(true);
+            // Centers the window on the screen
+            gameFrame.setLocationRelativeTo(null);
 
-        gameFrame.setContentPane(new GamePanel());
+
+            gameFrame.setContentPane(gamePanel);
+            ;
+            // Makes the window visible
+            gameFrame.setVisible(true);
+            gamePanel.requestFocusInWindow();
+
+            loopManager.start();
+        });
     }
 }

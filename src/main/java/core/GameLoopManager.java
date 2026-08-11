@@ -2,7 +2,7 @@ package core;
 
 import java.awt.*;
 import core.GamePanel;
-import static jdk.jfr.internal.consumer.EventLog.update;
+import entities.PlayerCharacter;
 
 // Purpose of this class is so that regardless of the device frame rate, the movement speed of the entities will remain the same
 public class GameLoopManager implements Runnable{
@@ -10,9 +10,11 @@ public class GameLoopManager implements Runnable{
     private boolean running = false;
     private GamePanel gamePanel;
     private Thread thread;
+    private PlayerCharacter playerCharacter;
 
-    public GameLoopManager(GamePanel gamePanel) {
+    public GameLoopManager(GamePanel gamePanel, PlayerCharacter playerCharacter) {
         this.gamePanel = gamePanel;
+        this.playerCharacter = playerCharacter;
     }
 
 
@@ -35,11 +37,13 @@ public class GameLoopManager implements Runnable{
 
             update(delta);
             gamePanel.repaint();
+            sleepUntilNextFrame();
         }
     }
 
     private void update(double delta) {
-    } // Leave empty for now, we will put individual .update for the entities
+        playerCharacter.update(delta, gamePanel.isUp(), gamePanel.isDown());
+    }
 
     private void sleepUntilNextFrame() {
         try {
