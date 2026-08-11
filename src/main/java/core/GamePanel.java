@@ -25,10 +25,10 @@ public class GamePanel extends JPanel {
             @Override
             public void keyPressed(KeyEvent e) {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_W -> up = true; // W is bound to up
-                    case KeyEvent.VK_S -> down = true; // S is bound to down
-                    case KeyEvent.VK_A -> left = true; // A is bound to left
-                    case KeyEvent.VK_D -> right = true; // D is bound to right
+                    case KeyEvent.VK_UP -> up = true; // Set up arrow key to make the player entity move north
+                    case KeyEvent.VK_DOWN -> down = true; // Set down arrow key to make the player entity move south
+                    case KeyEvent.VK_LEFT -> left = true; // Set left arrow key to make the player entity move west
+                    case KeyEvent.VK_RIGHT -> right = true; // Set right arrow key to make the player entity move east
                     case KeyEvent.VK_SHIFT -> slowDown = true; // Holding shift will make the player entity slow down
                 }
             }
@@ -37,10 +37,10 @@ public class GamePanel extends JPanel {
             public void keyReleased(KeyEvent e) {
                 switch (e.getKeyCode()) {
                     // Releasing any of these keys stops the player entity from moving in that direction
-                    case KeyEvent.VK_W -> up = false;
-                    case KeyEvent.VK_S -> down = false;
-                    case KeyEvent.VK_A -> left = false;
-                    case KeyEvent.VK_D -> right = false;
+                    case KeyEvent.VK_UP -> up = false;
+                    case KeyEvent.VK_DOWN -> down = false;
+                    case KeyEvent.VK_LEFT -> left = false;
+                    case KeyEvent.VK_RIGHT -> right = false;
                     case KeyEvent.VK_SHIFT -> slowDown = false;
                 }
             }
