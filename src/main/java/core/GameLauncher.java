@@ -21,5 +21,7 @@ public class GameLauncher extends JFrame {
 
         // Makes the window visible
         gameFrame.setVisible(true);
+
+        gameFrame.setContentPane(new GamePanel());
     }
 }
