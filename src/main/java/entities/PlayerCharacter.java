@@ -1,15 +1,28 @@
 package entities;
 
 import java.awt.*;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class PlayerCharacter {
     private double x, y;
     private double speed = 300;
     private int width = 20, height = 20;
+    private BufferedImage playerSprite;
 
     public PlayerCharacter(double startX, double startY) {
         this.x = startX;
         this.y = startY;
+
+        this.width = 40;
+        this.height = 40;
+
+        try {
+            playerSprite = ImageIO.read(getClass().getResourceAsStream("/sprites/zany.jpg"));
+        } catch (IOException | IllegalArgumentException e) {
+            System.err.println("Could not load player sprite.");
+        }
     }
 
     // Updates the position of the playable character.
@@ -38,8 +51,13 @@ public class PlayerCharacter {
 
     // Renders the hitbox of the playable character in the window
     public void render(Graphics2D g2d) {
-        g2d.setColor(Color.GREEN);
-        g2d.fillRect((int) x, (int) y, width, height);
+        if (playerSprite != null) {
+            g2d.drawImage(playerSprite, (int) x, (int) y, width, height, null);
+        } else {
+            // Fallback if image cannot be found
+            g2d.setColor(Color.GREEN);
+            g2d.fillRect((int) x, (int) y, width, height);
+        }
     }
 
     // Getters
