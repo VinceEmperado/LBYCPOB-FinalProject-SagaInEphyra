@@ -19,7 +19,7 @@ public class PlayerCharacter {
         this.height = 40;
 
         try {
-            playerSprite = ImageIO.read(getClass().getResourceAsStream("/sprites/zany.jpg"));
+            playerSprite = ImageIO.read(getClass().getResourceAsStream("/sprites/player/zany.jpg"));
         } catch (IOException | IllegalArgumentException e) {
             System.err.println("Could not load player sprite.");
         }

@@ -7,7 +7,7 @@ import javax.swing.*;
 public class GameLauncher extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            PlayerCharacter player = new PlayerCharacter(390, 500);
+            PlayerCharacter player = new PlayerCharacter(780, 800);
             GamePanel gamePanel = new GamePanel(player);
             GameLoopManager loopManager = new GameLoopManager(gamePanel, player);
 
@@ -18,7 +18,7 @@ public class GameLauncher extends JFrame {
             gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
             // Set the dimensions of the window, in this case it will be 800x600
-            gameFrame.setSize(800, 600);
+            gameFrame.setSize(1600, 900);
 
             // The will force the window to stay on the same size, the user will not be able to resize it
             gameFrame.setResizable(false);
