@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.Color;
 
 public class GamePanel extends JPanel {
     private boolean up, down, left, right, slowDown;
@@ -13,6 +14,7 @@ public class GamePanel extends JPanel {
 
     public GamePanel(PlayerCharacter playerCharacter) {
         this.playerCharacter = playerCharacter;
+        this.setBackground(Color.BLACK);
         setDoubleBuffered(true);
         setPreferredSize(new Dimension(800,600));
         setFocusable(true);
