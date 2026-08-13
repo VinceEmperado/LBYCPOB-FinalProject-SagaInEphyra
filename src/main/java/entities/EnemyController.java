@@ -8,17 +8,10 @@ import java.util.Random;
 
 public class EnemyController {
     private double x, y;
-    private double targetX, targetY;
 
-    private int width = 60, height = 60;
-    private double speed = 300;
+    private int width = 120, height = 120;
     private BufferedImage enemySprite;
     private Random random = new Random();
-
-    // state machine
-    private enum State { MOVING, ATTACKING }
-    // attack then move
-    private State currentState = State.ATTACKING;
 
     private double attackTimer = 0;
     // stays still to attack before moving again
@@ -27,45 +20,28 @@ public class EnemyController {
     public EnemyController(double startX, double startY) {
         this.x = startX;
         this.y = startY;
-        this.targetX = startX;
-        this.targetY = startY;
 
         try {
-            enemySprite = ImageIO.read(getClass().getResourceAsStream("/sprites/boss/enemy.png"));
+            enemySprite = ImageIO.read(getClass().getResourceAsStream("/sprites/boss/mart.png"));
         } catch (IOException | IllegalArgumentException e) {
             System.err.println("Could not load standard enemy sprite.");
         }
     }
 
     public void update(double delta, int panelWidth, int panelHeight) {
-        if (currentState == State.MOVING) {
-            double dx = targetX - x;
-            double dy = targetY - y;
-            double distance = Math.sqrt(dx * dx + dy * dy);
+        // call the attacks here
 
-            if (distance < 5.0) {
-                x = targetX;
-                y = targetY;
-                currentState = State.ATTACKING;
-                attackTimer = 0; // reset the attack timer
-            } else {
-                x += (dx / distance) * speed * delta;
-                y += (dy / distance) * speed * delta;
-            }
+        attackTimer += delta;
 
-        } else if (currentState == State.ATTACKING) {
-            // call the attacks here
+        // picks a new spot to teleport to once the timer finishes
+        if (attackTimer >= attackDuration) {
 
-            attackTimer += delta;
+            // teleport to a new random location
+            x = random.nextInt(panelWidth - width);
+            y = random.nextInt((panelHeight / 2) - height);
 
-            // picks a new spot to move
-            if (attackTimer >= attackDuration) {
-                targetX = random.nextInt(panelWidth - width);
-                
-                targetY = random.nextInt((panelHeight / 2) - height);
-
-                currentState = State.MOVING;
-            }
+            // reset the attack timer
+            attackTimer = 0;
         }
     }
 
