@@ -2,92 +2,91 @@ package core;
 
 import entities.EnemyController;
 import entities.PlayerCharacter;
-import pools.BulletPool;
 
-import javax.swing.JPanel;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
-public class GamePanel extends JPanel implements KeyListener {
-    private PlayerCharacter player;
-    private EnemyController enemy;
-    private BulletPool bulletPool;
-
+public class GamePanel {
     private boolean up, down, left, right, slowDown;
+    private PlayerCharacter playerCharacter;
+    private EnemyController enemy;
+    private final Canvas canvas;
+    private final GraphicsContext graphicsContext;
 
-    public GamePanel(PlayerCharacter player, EnemyController enemy, BulletPool bulletPool) {
-        this.player = player;
+    public GamePanel(PlayerCharacter playerCharacter, EnemyController enemy) {
+        this.playerCharacter = playerCharacter;
         this.enemy = enemy;
-        this.bulletPool = bulletPool;
-
-        setPreferredSize(new Dimension(1600, 900));
-        setBackground(Color.BLACK);
-        setDoubleBuffered(true);
-        setFocusable(true);
-
-        addKeyListener(this);
+        this.canvas = new Canvas(1600, 900);
+        this.graphicsContext = canvas.getGraphicsContext2D();
+        canvas.setFocusTraversable(true);
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-
-        // Render enemy and active bullets
-        if (enemy != null) {
-            enemy.render(g2d);
-        }
-
-        if (bulletPool != null) {
-            bulletPool.render(g2d);
-        }
-
-        // Render player if method exists
-        if (player != null) {
-            player.render(g2d);
-        }
-
-        g2d.dispose();
+    // This method takes the key input of the user and performs an action depending on which key is pressed or released.
+    public void inputHandling(Scene scene) {
+        scene.setOnKeyPressed(e -> {
+            switch (e.getCode()) {
+                case W -> up = true;
+                case S -> down = true;
+                case A -> left = true;
+                case D -> right = true;
+                default -> {}
+            }
+        });
+        scene.setOnKeyReleased(e -> {
+            switch (e.getCode()) {
+                case W -> up = false;
+                case S -> down = false;
+                case A -> left = false;
+                case D -> right = false;
+                default -> {}
+            }
+        });
     }
 
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        int code = e.getKeyCode();
-        if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) up = true;
-        if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) down = true;
-        if (code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) left = true;
-        if (code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) right = true;
-        if (code == KeyEvent.VK_SHIFT) slowDown = true;
+    public void render() {
+        graphicsContext.setFill(Color.BLACK);
+        graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        playerCharacter.render(graphicsContext);
+        enemy.render(graphicsContext);
     }
 
-    @Override
-    public void keyReleased(KeyEvent e) {
-        int code = e.getKeyCode();
-        if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) up = false;
-        if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) down = false;
-        if (code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) left = false;
-        if (code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) right = false;
-        if (code == KeyEvent.VK_SHIFT) slowDown = false;
+    // Getters for the methods that help the player entity move in the PlayerCharacter class
+    public boolean isUp() {
+        return up;
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-        // Not used
+    public boolean isDown() {
+        return down;
     }
 
+    public boolean isLeft() {
+        return left;
+    }
 
-    public boolean isUp() { return up; }
-    public boolean isDown() { return down; }
-    public boolean isLeft() { return left; }
-    public boolean isRight() { return right; }
-    public boolean isSlowDown() { return slowDown; }
+    public boolean isRight() {
+        return right;
+    }
 
-    public BulletPool getBulletPool() { return bulletPool; }
-    public EnemyController getEnemy() { return enemy; }
-    public PlayerCharacter getPlayer() { return player; }
+    public boolean isSlowDown() {
+        return slowDown;
+    }
+
+    public Canvas getCanvas() {
+        return canvas;
+    }
+
+    public int getPanelWidth() {
+        return (int) canvas.getWidth();
+    }
+
+    public int getPanelHeight() {
+        return (int) canvas.getHeight();
+    }
 }
