@@ -1,41 +1,49 @@
 package core;
 
+import combat.PatternSpawner;
 import entities.EnemyController;
 import entities.PlayerCharacter;
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
-import javafx.stage.Stage;
+import pools.BulletPool;
 
+import javax.swing.*;
 
-import static javafx.application.Application.launch;
-
-public class GameLauncher extends Application {
+public class GameLauncher extends JFrame {
     public static void main(String[] args) {
-        launch(args);
-    }
+        SwingUtilities.invokeLater(() -> {
+            // 1. Initialize bullet handling infrastructure
+            BulletPool bulletPool = new BulletPool(1000);
+            PatternSpawner patternSpawner = new PatternSpawner(bulletPool);
 
-    @Override
-    public void start(Stage primaryStage) {
-        PlayerCharacter player = new PlayerCharacter(390, 500);
-        EnemyController enemy = new EnemyController(100, 150);
-        GamePanel gamePanel =  new GamePanel(player, enemy);
-        GameLoopManager loopManager = new GameLoopManager(gamePanel, player, enemy);
+            // 2. Instantiate entities (passing patternSpawner to enemy)
+            PlayerCharacter player = new PlayerCharacter(780, 800);
+            EnemyController enemy = new EnemyController(100, 150, patternSpawner);
 
-        Pane root = new Pane(gamePanel.getCanvas());
-        Scene scene = new Scene(root, 1900, 600);
-        gamePanel.inputHandling(scene);
+            // 3. Instantiate GamePanel with bulletPool for rendering/updates
+            GamePanel gamePanel = new GamePanel(player, enemy, bulletPool);
+            GameLoopManager loopManager = new GameLoopManager(gamePanel, player, enemy);
 
-        primaryStage.setTitle("Saga in Ephyra");
-        primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
-        primaryStage.setOnCloseRequest(e -> {
-            loopManager.stop();
-            System.exit(0);
+            // Creates the window object, the title at the top bar will be Saga in Ephyra
+            JFrame gameFrame = new JFrame("Saga in Ephyra");
+
+            // Ensures that the window will close whenever the X button is pressed
+            gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+            // Set the dimensions of the window, in this case it will be 1600x900
+            gameFrame.setSize(1600, 900);
+
+            // This will force the window to stay on the same size, the user will not be able to resize it
+            gameFrame.setResizable(false);
+
+            // Centers the window on the screen
+            gameFrame.setLocationRelativeTo(null);
+
+            gameFrame.setContentPane(gamePanel);
+
+            // Makes the window visible
+            gameFrame.setVisible(true);
+            gamePanel.requestFocusInWindow();
+
+            loopManager.start();
         });
-        primaryStage.show();
-
-        gamePanel.getCanvas().requestFocus();
-        loopManager.start();
     }
 }

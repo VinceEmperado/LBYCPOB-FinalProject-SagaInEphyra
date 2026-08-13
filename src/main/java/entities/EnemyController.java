@@ -1,16 +1,20 @@
 package entities;
 
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
-import javafx.scene.transform.Affine;
+import combat.PatternSpawner;
+
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.IOException;
 import java.util.Random;
 
 public class EnemyController {
     private double x, y;
 
     private int width = 120, height = 120;
-    private Image enemySprite;
+    private BufferedImage enemySprite;
+    private BufferedImage bulletSprite;
     private Random random = new Random();
 
     private double attackTimer = 0;
@@ -20,14 +24,25 @@ public class EnemyController {
     private double currentRotation = 0.0;
     private boolean isPreparingToTeleport = false;
 
-    public EnemyController(double startX, double startY) {
+    private PatternSpawner patternSpawner;
+    private double pincerCooldown = 0.0;
+    private double pincerInterval = 1.0;
+
+    public EnemyController(double startX, double startY, PatternSpawner patternSpawner) {
         this.x = startX;
         this.y = startY;
+        this.patternSpawner = patternSpawner;
 
         try {
-            enemySprite = new Image(getClass().getResourceAsStream("/sprites/boss/mart.png"));
-        } catch (Exception e) {
+            enemySprite = ImageIO.read(getClass().getResourceAsStream("/sprites/boss/mart.png"));
+        } catch (IOException | IllegalArgumentException e) {
             System.err.println("Could not load standard enemy sprite.");
+        }
+
+        try {
+            bulletSprite = ImageIO.read(getClass().getResourceAsStream("/sprites/bullets/pincer.png"));
+        } catch (IOException | IllegalArgumentException e) {
+            System.err.println("Could not load bullet sprite, defaulting to fallback color.");
         }
     }
 
@@ -40,8 +55,8 @@ public class EnemyController {
         }
 
         else if (attackTimer >= (attackDuration + teleportWarningDuration)) {
-            x = random.nextInt(panelWidth - width);
-            y = random.nextInt((panelHeight / 2) - height);
+            x = random.nextInt(Math.max(1, panelWidth - width));
+            y = random.nextInt(Math.max(1, (panelHeight / 2) - height));
 
             attackTimer = 0;
             isPreparingToTeleport = false;
@@ -51,33 +66,55 @@ public class EnemyController {
         else {
             isPreparingToTeleport = false;
             currentRotation = 0.0;
+
+            pincerCooldown += delta;
+            if (pincerCooldown >= pincerInterval) {
+                pincerCooldown = 0;
+                firePincerAttack();
+            }
         }
     }
 
-    public void render(GraphicsContext gc) {
-        Affine oldTransform = gc.getTransform();
+    private void firePincerAttack() {
+        if (patternSpawner == null) return;
+
+        double centerX = x + (width / 2.0);
+        double centerY = y + (height / 2.0);
+
+        double flankOffset = 180.0;
+        int bulletsPerSide = 4;
+        double bulletSpeed = 200.0;
+        double inwardAngle = Math.toRadians(55);
+
+        patternSpawner.spawnPincer(
+                centerX,
+                centerY,
+                flankOffset,
+                bulletsPerSide,
+                bulletSpeed,
+                inwardAngle,
+                bulletSprite,
+                Color.ORANGE
+        );
+    }
+
+    public void render(Graphics2D g2d) {
+        AffineTransform oldTransform = g2d.getTransform();
 
         if (isPreparingToTeleport) {
-            double pivotX = x + width / 2;
-            double pivotY = y + height / 2;
-            double degrees = Math.toDegrees(currentRotation);
-
-            gc.translate(pivotX, pivotY);
-            gc.rotate(degrees);
-            gc.translate(-pivotX, -pivotY);
+            g2d.rotate(currentRotation, x + (width / 2.0), y + (height / 2.0));
         }
 
         if (enemySprite != null) {
-            gc.drawImage(enemySprite, (int) x, (int) y, width, height);
+            g2d.drawImage(enemySprite, (int) x, (int) y, width, height, null);
         } else {
-            gc.setFill(Color.YELLOW);
-            gc.fillRect((int) x, (int) y, width, height);
+            g2d.setColor(Color.YELLOW);
+            g2d.fillRect((int) x, (int) y, width, height);
         }
 
-        gc.setTransform(oldTransform);
+        g2d.setTransform(oldTransform);
     }
 
-    // Getters
     public double getX() { return x; }
     public double getY() { return y; }
     public int getWidth() { return width; }
