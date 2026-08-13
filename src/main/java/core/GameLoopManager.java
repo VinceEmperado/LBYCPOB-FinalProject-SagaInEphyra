@@ -3,6 +3,7 @@ package core;
 import java.awt.*;
 import core.GamePanel;
 import entities.PlayerCharacter;
+import entities.EnemyController;
 
 // Purpose of this class is so that regardless of the device frame rate, the movement speed of the entities will remain the same
 public class GameLoopManager implements Runnable{
@@ -11,10 +12,12 @@ public class GameLoopManager implements Runnable{
     private GamePanel gamePanel;
     private Thread thread;
     private PlayerCharacter playerCharacter;
+    private EnemyController enemy;
 
-    public GameLoopManager(GamePanel gamePanel, PlayerCharacter playerCharacter) {
+    public GameLoopManager(GamePanel gamePanel, PlayerCharacter playerCharacter, EnemyController enemy) {
         this.gamePanel = gamePanel;
         this.playerCharacter = playerCharacter;
+        this.enemy = enemy;
     }
 
 
@@ -43,6 +46,7 @@ public class GameLoopManager implements Runnable{
 
     private void update(double delta) {
         playerCharacter.update(delta, gamePanel.isUp(), gamePanel.isDown(), gamePanel.isLeft(), gamePanel.isRight(), gamePanel.getWidth(), gamePanel.getHeight(), gamePanel.isSlowDown());
+        enemy.update(delta, gamePanel.getWidth(), gamePanel.getHeight());
     }
 
     private void sleepUntilNextFrame() {

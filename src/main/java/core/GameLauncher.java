@@ -1,5 +1,6 @@
 package core;
 
+import entities.EnemyController;
 import entities.PlayerCharacter;
 
 import javax.swing.*;
@@ -8,8 +9,9 @@ public class GameLauncher extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             PlayerCharacter player = new PlayerCharacter(780, 800);
-            GamePanel gamePanel = new GamePanel(player);
-            GameLoopManager loopManager = new GameLoopManager(gamePanel, player);
+            EnemyController enemy = new EnemyController(100, 150);
+            GamePanel gamePanel = new GamePanel(player, enemy);
+            GameLoopManager loopManager = new GameLoopManager(gamePanel, player, enemy);
 
             // Creates the window object, the title at the top bar will be Saga in Ephyra
             JFrame gameFrame = new JFrame("Saga in Ephyra");
