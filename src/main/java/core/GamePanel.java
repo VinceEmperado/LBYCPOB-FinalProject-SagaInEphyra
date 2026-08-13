@@ -1,5 +1,6 @@
 package core;
 
+import entities.EnemyController;
 import entities.PlayerCharacter;
 
 import javax.swing.*;
@@ -11,9 +12,11 @@ import java.awt.Color;
 public class GamePanel extends JPanel {
     private boolean up, down, left, right, slowDown;
     private PlayerCharacter playerCharacter;
+    private EnemyController enemy;
 
-    public GamePanel(PlayerCharacter playerCharacter) {
+    public GamePanel(PlayerCharacter playerCharacter, EnemyController enemy) {
         this.playerCharacter = playerCharacter;
+        this.enemy = enemy;
         this.setBackground(Color.BLACK);
         setDoubleBuffered(true);
         setPreferredSize(new Dimension(800,600));
@@ -50,10 +53,12 @@ public class GamePanel extends JPanel {
         });
     }
 
+    @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         playerCharacter.render(g2d);
+        enemy.render(g2d);
     }
 
     // Getters for the methods that help the player entity move in the PlayerCharacter class
