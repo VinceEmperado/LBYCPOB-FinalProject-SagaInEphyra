@@ -6,7 +6,7 @@ import entities.PlayerCharacter;
 import entities.EnemyController;
 
 // Purpose of this class is so that regardless of the device frame rate, the movement speed of the entities will remain the same
-public class GameLoopManager implements Runnable{
+public class GameLoopManager implements Runnable {
     private long lastTime = System.nanoTime();
     private boolean running = false;
     private GamePanel gamePanel;
@@ -20,7 +20,6 @@ public class GameLoopManager implements Runnable{
         this.enemy = enemy;
     }
 
-
     public void start() {
         running = true;
         thread = new Thread(this);
@@ -30,7 +29,7 @@ public class GameLoopManager implements Runnable{
     public void stop() {
         running = false;
     }
-    
+
     @Override
     public void run() {
         while (running) {
@@ -47,6 +46,10 @@ public class GameLoopManager implements Runnable{
     private void update(double delta) {
         playerCharacter.update(delta, gamePanel.isUp(), gamePanel.isDown(), gamePanel.isLeft(), gamePanel.isRight(), gamePanel.getWidth(), gamePanel.getHeight(), gamePanel.isSlowDown());
         enemy.update(delta, gamePanel.getWidth(), gamePanel.getHeight());
+
+        if (gamePanel.getBulletPool() != null) {
+            gamePanel.getBulletPool().update(delta, gamePanel.getWidth(), gamePanel.getHeight());
+        }
     }
 
     private void sleepUntilNextFrame() {

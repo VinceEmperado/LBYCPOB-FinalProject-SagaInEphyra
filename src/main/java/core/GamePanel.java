@@ -2,83 +2,92 @@ package core;
 
 import entities.EnemyController;
 import entities.PlayerCharacter;
+import pools.BulletPool;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import javax.swing.JPanel;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
-public class GamePanel extends JPanel {
-    private boolean up, down, left, right, slowDown;
-    private PlayerCharacter playerCharacter;
+public class GamePanel extends JPanel implements KeyListener {
+    private PlayerCharacter player;
     private EnemyController enemy;
+    private BulletPool bulletPool;
 
-    public GamePanel(PlayerCharacter playerCharacter, EnemyController enemy) {
-        this.playerCharacter = playerCharacter;
+    private boolean up, down, left, right, slowDown;
+
+    public GamePanel(PlayerCharacter player, EnemyController enemy, BulletPool bulletPool) {
+        this.player = player;
         this.enemy = enemy;
-        this.setBackground(Color.BLACK);
+        this.bulletPool = bulletPool;
+
+        setPreferredSize(new Dimension(1600, 900));
+        setBackground(Color.BLACK);
         setDoubleBuffered(true);
-        setPreferredSize(new Dimension(800,600));
         setFocusable(true);
-        setupKeyBindings();
-    }
 
-    // This method takes the key input of the user and performs an action depending on which key is pressed or released.
-    private void setupKeyBindings() {
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_UP -> up = true; // Set up arrow key to make the player entity move north
-                    case KeyEvent.VK_DOWN -> down = true; // Set down arrow key to make the player entity move south
-                    case KeyEvent.VK_LEFT -> left = true; // Set left arrow key to make the player entity move west
-                    case KeyEvent.VK_RIGHT -> right = true; // Set right arrow key to make the player entity move east
-                    case KeyEvent.VK_SHIFT -> slowDown = true; // Holding shift will make the player entity slow down
-                }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                switch (e.getKeyCode()) {
-                    // Releasing any of these keys stops the player entity from moving in that direction
-                    case KeyEvent.VK_UP -> up = false;
-                    case KeyEvent.VK_DOWN -> down = false;
-                    case KeyEvent.VK_LEFT -> left = false;
-                    case KeyEvent.VK_RIGHT -> right = false;
-                    case KeyEvent.VK_SHIFT -> slowDown = false;
-                }
-            }
-
-        });
+        addKeyListener(this);
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-        playerCharacter.render(g2d);
-        enemy.render(g2d);
+
+        // Render enemy and active bullets
+        if (enemy != null) {
+            enemy.render(g2d);
+        }
+
+        if (bulletPool != null) {
+            bulletPool.render(g2d);
+        }
+
+        // Render player if method exists
+        if (player != null) {
+            player.render(g2d);
+        }
+
+        g2d.dispose();
     }
 
-    // Getters for the methods that help the player entity move in the PlayerCharacter class
-    public boolean isUp() {
-        return up;
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int code = e.getKeyCode();
+        if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) up = true;
+        if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) down = true;
+        if (code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) left = true;
+        if (code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) right = true;
+        if (code == KeyEvent.VK_SHIFT) slowDown = true;
     }
 
-    public boolean isDown() {
-        return down;
+    @Override
+    public void keyReleased(KeyEvent e) {
+        int code = e.getKeyCode();
+        if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) up = false;
+        if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) down = false;
+        if (code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) left = false;
+        if (code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) right = false;
+        if (code == KeyEvent.VK_SHIFT) slowDown = false;
     }
 
-    public boolean isLeft() {
-        return left;
+    @Override
+    public void keyTyped(KeyEvent e) {
+        // Not used
     }
 
-    public boolean isRight() {
-        return right;
-    }
 
-    public boolean isSlowDown() {
-        return slowDown;
-    }
+    public boolean isUp() { return up; }
+    public boolean isDown() { return down; }
+    public boolean isLeft() { return left; }
+    public boolean isRight() { return right; }
+    public boolean isSlowDown() { return slowDown; }
+
+    public BulletPool getBulletPool() { return bulletPool; }
+    public EnemyController getEnemy() { return enemy; }
+    public PlayerCharacter getPlayer() { return player; }
 }
