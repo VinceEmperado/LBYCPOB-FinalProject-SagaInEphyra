@@ -2,14 +2,16 @@ package entities;
 
 import java.awt.*;
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.image.Image;
 
 public class PlayerCharacter {
     private double x, y;
     private double speed = 300;
     private int width = 20, height = 20;
-    private BufferedImage playerSprite;
+    private Image playerSprite;
 
     public PlayerCharacter(double startX, double startY) {
         this.x = startX;
@@ -19,8 +21,8 @@ public class PlayerCharacter {
         this.height = 40;
 
         try {
-            playerSprite = ImageIO.read(getClass().getResourceAsStream("/sprites/player/zany.jpg"));
-        } catch (IOException | IllegalArgumentException e) {
+            playerSprite = new Image(getClass().getResourceAsStream("/sprites/player/zany.jpg"));
+        } catch (Exception e) {
             System.err.println("Could not load player sprite.");
         }
     }
@@ -45,18 +47,18 @@ public class PlayerCharacter {
             x += speed * delta;
         }
 
-        x = Math.clamp(x, 0, panelWidth - width);
-        y = Math.clamp(y, 0, panelHeight - height);
+        x = Math.max(0, Math.min(x, 1600 - width));
+        y = Math.max(0, Math.min(y, 900 - height));
     }
 
     // Renders the hitbox of the playable character in the window
-    public void render(Graphics2D g2d) {
-        if (playerSprite != null) {
-            g2d.drawImage(playerSprite, (int) x, (int) y, width, height, null);
+    public void render(GraphicsContext gc) {
+        if (playerSprite != null && !playerSprite.isError()) {
+            gc.drawImage(playerSprite, (int) x, (int) y, width, height);
         } else {
             // Fallback if image cannot be found
-            g2d.setColor(Color.GREEN);
-            g2d.fillRect((int) x, (int) y, width, height);
+            gc.setFill(Color.GREEN);
+            gc.fillRect((int) x, (int) y, width, height);
         }
     }
 

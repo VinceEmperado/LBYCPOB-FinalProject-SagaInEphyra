@@ -1,17 +1,16 @@
 package entities;
 
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
-import java.io.IOException;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
+import javafx.scene.transform.Affine;
 import java.util.Random;
 
 public class EnemyController {
     private double x, y;
 
     private int width = 120, height = 120;
-    private BufferedImage enemySprite;
+    private Image enemySprite;
     private Random random = new Random();
 
     private double attackTimer = 0;
@@ -26,8 +25,8 @@ public class EnemyController {
         this.y = startY;
 
         try {
-            enemySprite = ImageIO.read(getClass().getResourceAsStream("/sprites/boss/mart.png"));
-        } catch (IOException | IllegalArgumentException e) {
+            enemySprite = new Image(getClass().getResourceAsStream("/sprites/boss/mart.png"));
+        } catch (Exception e) {
             System.err.println("Could not load standard enemy sprite.");
         }
     }
@@ -55,21 +54,27 @@ public class EnemyController {
         }
     }
 
-    public void render(Graphics2D g2d) {
-        AffineTransform oldTransform = g2d.getTransform();
+    public void render(GraphicsContext gc) {
+        Affine oldTransform = gc.getTransform();
 
         if (isPreparingToTeleport) {
-            g2d.rotate(currentRotation, x + (width / 2.0), y + (height / 2.0));
+            double pivotX = x + width / 2;
+            double pivotY = y + height / 2;
+            double degrees = Math.toDegrees(currentRotation);
+
+            gc.translate(pivotX, pivotY);
+            gc.rotate(degrees);
+            gc.translate(-pivotX, -pivotY);
         }
 
         if (enemySprite != null) {
-            g2d.drawImage(enemySprite, (int) x, (int) y, width, height, null);
+            gc.drawImage(enemySprite, (int) x, (int) y, width, height);
         } else {
-            g2d.setColor(Color.YELLOW);
-            g2d.fillRect((int) x, (int) y, width, height);
+            gc.setFill(Color.YELLOW);
+            gc.fillRect((int) x, (int) y, width, height);
         }
 
-        g2d.setTransform(oldTransform);
+        gc.setTransform(oldTransform);
     }
 
     // Getters
