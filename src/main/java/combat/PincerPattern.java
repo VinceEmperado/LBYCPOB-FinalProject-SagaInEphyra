@@ -1,8 +1,8 @@
 package combat;
 
 import pools.BulletPool;
-import java.awt.Color;
-import java.awt.image.BufferedImage;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 public class PincerPattern implements FirePattern {
     private double offset;
@@ -18,7 +18,7 @@ public class PincerPattern implements FirePattern {
     }
 
     @Override
-    public void execute(BulletPool pool, double originX, double originY, BufferedImage sprite, Color fallbackColor) {
+    public void execute(BulletPool pool, double originX, double originY, Image sprite, Color fallbackColor) {
         if (pool == null) return;
 
         double leftSpawnX = originX - offset;

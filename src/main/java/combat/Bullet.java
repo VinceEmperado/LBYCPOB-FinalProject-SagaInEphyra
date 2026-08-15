@@ -1,21 +1,20 @@
 package combat;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 public class Bullet {
     private double x, y;
     private double vx, vy;
     private double angle;
     private boolean active = false;
-    private BufferedImage sprite;
+    private Image sprite;
     private Color fallbackColor = Color.RED;
 
     public Bullet() {}
 
-    public void spawn(double x, double y, double vx, double vy, BufferedImage sprite, Color fallbackColor) {
+    public void spawn(double x, double y, double vx, double vy, Image sprite, Color fallbackColor) {
         this.x = x;
         this.y = y;
         this.vx = vx;
@@ -38,27 +37,27 @@ public class Bullet {
         }
     }
 
-    public void render(Graphics2D g2d) {
+    public void render(GraphicsContext gc) {
         if (!active) return;
 
-        AffineTransform oldTransform = g2d.getTransform();
+        gc.save();
 
         if (sprite != null) {
-            int w = sprite.getWidth();
-            int h = sprite.getHeight();
+            double w = sprite.getWidth();
+            double h = sprite.getHeight();
 
             // Center image at (x, y) and rotate according to direction
-            g2d.translate(x, y);
-            g2d.rotate(angle);
-            g2d.drawImage(sprite, -w / 2, -h / 2, null);
+            gc.translate(x, y);
+            gc.rotate(angle);
+            gc.drawImage(sprite, -w / 2, -h / 2);
         } else {
             // Fallback render for testing before image files exist
             int radius = 6;
-            g2d.setColor(fallbackColor);
-            g2d.fillOval((int) (x - radius), (int) (y - radius), radius * 2, radius * 2);
+            gc.setFill(fallbackColor);
+            gc.fillOval((int) (x - radius), (int) (y - radius), radius * 2, radius * 2);
         }
 
-        g2d.setTransform(oldTransform);
+        gc.restore();
     }
 
     // Getters & Setters

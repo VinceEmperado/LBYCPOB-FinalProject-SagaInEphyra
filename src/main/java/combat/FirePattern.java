@@ -1,9 +1,9 @@
 package combat;
 
 import pools.BulletPool;
-import java.awt.Color;
-import java.awt.image.BufferedImage;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 public interface FirePattern {
-    void execute(BulletPool pool, double originX, double originY, BufferedImage sprite, Color fallbackColor);
+    void execute(BulletPool pool, double originX, double originY, Image sprite, Color fallbackColor);
 }
