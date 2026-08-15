@@ -1,8 +1,6 @@
 package entities;
 
 import java.awt.*;
-import javax.imageio.ImageIO;
-import java.io.IOException;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.image.Image;
@@ -28,7 +26,7 @@ public class PlayerCharacter {
     }
 
     // Updates the position of the playable character.
-    public void update(double delta, boolean up, boolean down, boolean left, boolean right, int panelWidth, int panelHeight, boolean slowDown) {
+    public void update(double delta, boolean up, boolean down, boolean left, boolean right, double panelWidth, double panelHeight, boolean slowDown) {
         if (slowDown) {
             this.speed = 200;
         } else {
@@ -54,7 +52,7 @@ public class PlayerCharacter {
     // Renders the hitbox of the playable character in the window
     public void render(GraphicsContext gc) {
         if (playerSprite != null && !playerSprite.isError()) {
-            gc.drawImage(playerSprite, (int) x, (int) y, width, height);
+            gc.drawImage(playerSprite, x, y, width, height);
         } else {
             // Fallback if image cannot be found
             gc.setFill(Color.GREEN);

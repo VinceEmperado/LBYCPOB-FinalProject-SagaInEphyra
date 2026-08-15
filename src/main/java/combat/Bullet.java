@@ -25,7 +25,7 @@ public class Bullet {
         this.active = true;
     }
 
-    public void update(double delta, int panelWidth, int panelHeight) {
+    public void update(double delta, double panelWidth, double panelHeight) {
         if (!active) return;
 
         x += vx * delta;

@@ -4,15 +4,13 @@ import entities.EnemyController;
 import entities.PlayerCharacter;
 import pools.BulletPool;
 
-import javax.swing.JPanel;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.paint.Color;
 
-public class GamePanel extends JPanel implements KeyListener {
+public class GamePanel extends Canvas {
     private PlayerCharacter player;
     private EnemyController enemy;
     private BulletPool bulletPool;
@@ -20,66 +18,53 @@ public class GamePanel extends JPanel implements KeyListener {
     private boolean up, down, left, right, slowDown;
 
     public GamePanel(PlayerCharacter player, EnemyController enemy, BulletPool bulletPool) {
+        super(1600, 900);
         this.player = player;
         this.enemy = enemy;
         this.bulletPool = bulletPool;
 
-        setPreferredSize(new Dimension(1600, 900));
-        setBackground(Color.BLACK);
-        setDoubleBuffered(true);
-        setFocusable(true);
+        setFocusTraversable(true);
 
-        addKeyListener(this);
+        setOnKeyPressed(this::keyPressed);
+        setOnKeyReleased(this::keyReleased);
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
+    public void render() {
+        GraphicsContext gc = getGraphicsContext2D();
+
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0, 0, getWidth(), getHeight());
 
         // Render enemy and active bullets
         if (enemy != null) {
-            enemy.render(g2d);
+            enemy.render(gc);
+        }
+        if (player != null) {
+            player.render(gc);
         }
 
         if (bulletPool != null) {
-            bulletPool.render(g2d);
+            bulletPool.render(gc);
         }
-
-        // Render player if method exists
-        //if (player != null) {
-        //    player.render(g2d);
-        //}
-
-        g2d.dispose();
     }
 
-
-    @Override
     public void keyPressed(KeyEvent e) {
-        int code = e.getKeyCode();
-        if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) up = true;
-        if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) down = true;
-        if (code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) left = true;
-        if (code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) right = true;
-        if (code == KeyEvent.VK_SHIFT) slowDown = true;
+        KeyCode code = e.getCode();
+        if (code == KeyCode.W || code == KeyCode.UP) up = true;
+        if (code == KeyCode.S || code == KeyCode.DOWN) down = true;
+        if (code == KeyCode.A || code == KeyCode.LEFT) left = true;
+        if (code == KeyCode.D|| code == KeyCode.RIGHT) right = true;
+        if (code == KeyCode.SHIFT) slowDown = true;
     }
 
-    @Override
     public void keyReleased(KeyEvent e) {
-        int code = e.getKeyCode();
-        if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) up = false;
-        if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) down = false;
-        if (code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) left = false;
-        if (code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) right = false;
-        if (code == KeyEvent.VK_SHIFT) slowDown = false;
+        KeyCode code = e.getCode();
+        if (code == KeyCode.W || code == KeyCode.UP) up = false;
+        if (code == KeyCode.S || code == KeyCode.DOWN) down = false;
+        if (code == KeyCode.A || code == KeyCode.LEFT) left = false;
+        if (code == KeyCode.D|| code == KeyCode.RIGHT) right = false;
+        if (code == KeyCode.SHIFT) slowDown = false;
     }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-        // Not used
-    }
-
 
     public boolean isUp() { return up; }
     public boolean isDown() { return down; }

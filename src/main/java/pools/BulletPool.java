@@ -1,9 +1,9 @@
 package pools;
 
 import combat.Bullet;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class BulletPool {
         }
     }
 
-    public Bullet spawnBullet(double x, double y, double vx, double vy, BufferedImage sprite, Color fallbackColor) {
+    public Bullet spawnBullet(double x, double y, double vx, double vy, Image sprite, Color fallbackColor) {
         for (Bullet b : pool) {
             if (!b.isActive()) {
                 b.spawn(x, y, vx, vy, sprite, fallbackColor);
@@ -30,7 +30,7 @@ public class BulletPool {
         return newBullet;
     }
 
-    public void update(double delta, int panelWidth, int panelHeight) {
+    public void update(double delta, double panelWidth, double panelHeight) {
         for (Bullet b : pool) {
             if (b.isActive()) {
                 b.update(delta, panelWidth, panelHeight);
@@ -38,10 +38,10 @@ public class BulletPool {
         }
     }
 
-    public void render(Graphics2D g2d) {
+    public void render(GraphicsContext gc) {
         for (Bullet b : pool) {
             if (b.isActive()) {
-                b.render(g2d);
+                b.render(gc);
             }
         }
     }

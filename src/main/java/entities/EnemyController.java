@@ -2,19 +2,18 @@ package entities;
 
 import combat.PatternSpawner;
 
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
-import java.io.IOException;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import java.util.Random;
+
 
 public class EnemyController {
     private double x, y;
 
     private int width = 120, height = 120;
-    private BufferedImage enemySprite;
-    private BufferedImage bulletSprite;
+    private Image enemySprite;
+    private Image bulletSprite;
     private Random random = new Random();
 
     private double attackTimer = 0;
@@ -34,19 +33,19 @@ public class EnemyController {
         this.patternSpawner = patternSpawner;
 
         try {
-            enemySprite = ImageIO.read(getClass().getResourceAsStream("/sprites/boss/mart.png"));
-        } catch (IOException | IllegalArgumentException e) {
+            enemySprite = new Image(getClass().getResourceAsStream("/sprites/boss/mart.png"));
+        } catch (Exception e) {
             System.err.println("Could not load standard enemy sprite.");
         }
 
         try {
-            bulletSprite = ImageIO.read(getClass().getResourceAsStream("/sprites/bullets/pincer.png"));
-        } catch (IOException | IllegalArgumentException e) {
+            bulletSprite = new Image(getClass().getResourceAsStream("/sprites/bullets/pincer.png"));
+        } catch (Exception e) {
             System.err.println("Could not load bullet sprite, defaulting to fallback color.");
         }
     }
 
-    public void update(double delta, int panelWidth, int panelHeight) {
+    public void update(double delta, double panelWidth, double panelHeight) {
         attackTimer += delta;
 
         if (attackTimer >= attackDuration && attackTimer < (attackDuration + teleportWarningDuration)) {
@@ -55,8 +54,8 @@ public class EnemyController {
         }
 
         else if (attackTimer >= (attackDuration + teleportWarningDuration)) {
-            x = random.nextInt(Math.max(1, panelWidth - width));
-            y = random.nextInt(Math.max(1, (panelHeight / 2) - height));
+            x = random.nextInt(Math.max(1, (int) panelWidth - width));
+            y = random.nextInt(Math.max(1, (int) (panelHeight / 2) - height));
 
             attackTimer = 0;
             isPreparingToTeleport = false;
@@ -98,21 +97,25 @@ public class EnemyController {
         );
     }
 
-    public void render(Graphics2D g2d) {
-        AffineTransform oldTransform = g2d.getTransform();
+    public void render(GraphicsContext gc) {
+        gc.save();
 
         if (isPreparingToTeleport) {
-            g2d.rotate(currentRotation, x + (width / 2.0), y + (height / 2.0));
+            double pivotX = x + (width / 2.0);
+            double pivotY = y + (height / 2.0);
+            gc.translate(pivotX, pivotY);
+            gc.rotate(Math.toRadians(currentRotation));
+            gc.translate(-pivotX, -pivotY);
         }
 
         if (enemySprite != null) {
-            g2d.drawImage(enemySprite, (int) x, (int) y, width, height, null);
+            gc.drawImage(enemySprite, x, y, width, height);
         } else {
-            g2d.setColor(Color.YELLOW);
-            g2d.fillRect((int) x, (int) y, width, height);
+            gc.setFill(Color.YELLOW);
+            gc.fillRect(x, y, width, height);
         }
 
-        g2d.setTransform(oldTransform);
+        gc.restore();
     }
 
     public double getX() { return x; }
