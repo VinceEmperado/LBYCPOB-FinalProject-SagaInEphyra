@@ -45,6 +45,7 @@ public class GameLoopManager {
         timer.stop();
     }
 
+    // Updates the position of the player, enemy, and bullet entities
     private void update(double delta) {
         playerCharacter.update(delta, gamePanel.isUp(), gamePanel.isDown(), gamePanel.isLeft(), gamePanel.isRight(), gamePanel.getWidth(), gamePanel.getHeight(), gamePanel.isSlowDown());
         enemy.update(delta, gamePanel.getWidth(), gamePanel.getHeight());
@@ -54,11 +55,4 @@ public class GameLoopManager {
         }
     }
 
-    private void sleepUntilNextFrame() {
-        try {
-            Thread.sleep(16); // Should be 60fps
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
 }
