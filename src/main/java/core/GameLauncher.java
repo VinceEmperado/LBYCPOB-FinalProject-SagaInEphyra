@@ -6,11 +6,13 @@ import entities.enemies.EnemyController;
 import entities.PlayerCharacter;
 import pools.BulletPool;
 import ui.GameOverMenu;
+import ui.MainMenu;
 import ui.TestersMenu;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -21,6 +23,27 @@ public class GameLauncher extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        primaryStage.setTitle("Saga in Ephyra");
+        primaryStage.setResizable(false);
+
+        showMainMenu(primaryStage);
+
+        primaryStage.show();
+        primaryStage.centerOnScreen();
+    }
+
+    private void showMainMenu(Stage primaryStage) {
+        // MainMenu lives in this same package (core), so no import is needed.
+        MainMenu mainMenu = new MainMenu(
+                () -> startGame(primaryStage),
+                () -> System.exit(0)
+        );
+
+        Scene menuScene = new Scene(mainMenu, 1600, 900);
+        primaryStage.setScene(menuScene);
+    }
+
+    private void startGame(Stage primaryStage) {
         BulletPool bulletPool = new BulletPool(1000);
         PatternSpawner patternSpawner = new PatternSpawner(bulletPool);
 
@@ -40,10 +63,7 @@ public class GameLauncher extends Application {
         // Pass patternSpawner to createGameScene
         Scene scene = createGameScene(gamePanel, bulletPool, player, patternSpawner, gameOverMenu);
 
-        primaryStage.setTitle("Saga in Ephyra");
-        primaryStage.setResizable(false);
         primaryStage.setScene(scene);
-        primaryStage.show();
         primaryStage.centerOnScreen();
 
         gamePanel.requestFocus();
@@ -77,6 +97,11 @@ public class GameLauncher extends Application {
         StackPane root = new StackPane(gamePanel, testersOverlay, gameOverMenu);
         Scene scene = new Scene(root, 1600, 900);
 
+        // Makes it so that the player character can still move even after clicking on the tester menu
+        // Direct consequence: While browsing the menu with arrow keys, then the player will also move up and down
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, gamePanel::keyPressed);
+        scene.addEventFilter(KeyEvent.KEY_RELEASED, gamePanel::keyReleased);
+
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.F1) {
                 testersMenu.setVisible(!testersMenu.isVisible());
@@ -90,7 +115,9 @@ public class GameLauncher extends Application {
         if (loopManager != null) {
             loopManager.stop();
         }
-        start(stage);
+        // Goes straight back into a fresh game rather than back to the main
+        // menu - "Play Again" should restart, not require re-navigating menus.
+        startGame(stage);
     }
 
     public static void main(String[] args) {

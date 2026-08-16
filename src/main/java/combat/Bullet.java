@@ -12,6 +12,7 @@ public class Bullet {
     private Image sprite;
     private Color fallbackColor = Color.RED;
     private DamagePacket damagePacket; // Damage payload field
+    private double hitRadius = 3.0;
 
     public Bullet() {
         this.damagePacket = new DamagePacket(10.0); // Default fallback damage amount
@@ -31,6 +32,9 @@ public class Bullet {
         this.fallbackColor = fallbackColor;
         this.angle = Math.atan2(vy, vx); // Rotates bullet to face velocity direction
         this.active = true;
+        this.setDamage(damage);
+        this.damagePacket.setSourceX(x);
+        this.damagePacket.setSourceY(y);
     }
 
     public void update(double delta, double panelWidth, double panelHeight) {
@@ -56,7 +60,7 @@ public class Bullet {
 
             // Center image at (x, y) and rotate according to direction
             gc.translate(x, y);
-            gc.rotate(angle);
+            gc.rotate(Math.toDegrees(angle));
             gc.drawImage(sprite, -w / 2, -h / 2);
         } else {
             // Fallback render for testing before image files exist
@@ -99,4 +103,6 @@ public class Bullet {
     public void setActive(boolean active) { this.active = active; }
     public double getX() { return x; }
     public double getY() { return y; }
+    public double getHitRadius() { return hitRadius; }
+    public void setHitRadius(double hitRadius) { this.hitRadius = hitRadius; }
 }
