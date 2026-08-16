@@ -48,9 +48,10 @@ public class GameLoopManager {
         playerCharacter.update(delta, gamePanel.isUp(), gamePanel.isDown(), gamePanel.isLeft(), gamePanel.isRight(), gamePanel.getWidth(), gamePanel.getHeight(), gamePanel.isSlowDown());
         enemy.update(delta, gamePanel.getWidth(), gamePanel.getHeight());
 
+        enemy.checkOrbCollisions(playerCharacter);
+
         if (gamePanel.getBulletPool() != null) {
             gamePanel.getBulletPool().update(delta, gamePanel.getWidth(), gamePanel.getHeight());
         }
     }
-
 }

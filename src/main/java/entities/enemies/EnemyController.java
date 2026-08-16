@@ -1,6 +1,8 @@
 package entities.enemies;
 
 import combat.PatternSpawner;
+import entities.DamageOrb;
+import entities.PlayerCharacter;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -24,6 +26,10 @@ public abstract class EnemyController {
     protected double dialogueTimer = 0.0;
     protected double dialogueDuration = 3.0;
     protected String currentDialogueText = "";
+
+    protected java.util.List<DamageOrb> activeOrbs = new java.util.ArrayList<>();
+    protected double orbSpawnTimer = 0.0;
+    protected double orbSpawnInterval = 1.5;
 
     public EnemyController(double startX, double startY, String imagePath, PatternSpawner patternSpawner) {
         this.x = startX;
@@ -70,7 +76,37 @@ public abstract class EnemyController {
             // TODO: Death logic (e.g., set isDead flag, play animation)
         }
 
+        if (currentPhase == 2 && currentHealth > 0 && !isTransitioning) {
+            orbSpawnTimer += delta;
+
+            if (orbSpawnTimer >= orbSpawnInterval) {
+                double dropX = new java.util.Random().nextInt(Math.max(1, (int) panelWidth - 30));
+                double dropY = new java.util.Random().nextInt(Math.max(1, (int) panelHeight - 30));
+
+                activeOrbs.add(new DamageOrb(dropX, dropY));
+                orbSpawnTimer = 0;
+            }
+        }
+
         performAttackPattern(delta, panelWidth, panelHeight);
+    }
+
+    public void checkOrbCollisions(PlayerCharacter player) {
+        if (player == null || currentPhase != 2) return;
+
+        for (int i = activeOrbs.size() - 1; i >= 0; i--) {
+            DamageOrb orb = activeOrbs.get(i);
+
+            double dx = (player.getX() + player.getWidth() / 2.0) - orb.getX();
+            double dy = (player.getY() + player.getHeight() / 2.0) - orb.getY();
+            double distance = Math.hypot(dx, dy);
+
+            if (distance < (player.getWidth() / 2.0 + orb.getRadius())) {
+                takeDamage(orb.getDamageAmount());
+                activeOrbs.remove(i);
+                System.out.println("Picked up orb! Dealt " + orb.getDamageAmount() + " damage!");
+            }
+        }
     }
 
     protected abstract void performAttackPattern(double delta, double panelWidth, double panelHeight);
@@ -91,6 +127,10 @@ public abstract class EnemyController {
     }
 
     protected void renderUI(GraphicsContext gc) {
+        for (DamageOrb orb : activeOrbs) {
+            orb.render(gc);
+        }
+
         if (currentPhase == 2 && !isTransitioning) {
             gc.setFill(Color.RED);
             gc.fillRect(x, y - 15, width, 8);
