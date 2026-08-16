@@ -11,14 +11,22 @@ public class Bullet {
     private boolean active = false;
     private Image sprite;
     private Color fallbackColor = Color.RED;
+    private DamagePacket damagePacket; // Damage payload field
 
-    public Bullet() {}
+    public Bullet() {
+        this.damagePacket = new DamagePacket(10.0); // Default fallback damage amount
+    }
 
     public void spawn(double x, double y, double vx, double vy, Image sprite, Color fallbackColor) {
+        spawn(x, y, vx, vy, 10.0, sprite, fallbackColor); // Overload with default damage
+    }
+
+    public void spawn(double x, double y, double vx, double vy, double damage, Image sprite, Color fallbackColor) {
         this.x = x;
         this.y = y;
         this.vx = vx;
         this.vy = vy;
+        this.setDamage(damage); // Assign or update damage value
         this.sprite = sprite;
         this.fallbackColor = fallbackColor;
         this.angle = Math.atan2(vy, vx); // Rotates bullet to face velocity direction
@@ -60,7 +68,22 @@ public class Bullet {
         gc.restore();
     }
 
-    // Getters & Setters
+    public DamagePacket getDamagePacket() {
+        return damagePacket;
+    }
+
+    public void setDamagePacket(DamagePacket damagePacket) {
+        this.damagePacket = damagePacket;
+    }
+
+    public void setDamage(double amount) {
+        if (this.damagePacket == null) {
+            this.damagePacket = new DamagePacket(amount);
+        } else {
+            this.damagePacket.setAmount(amount);
+        }
+    }
+
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
     public double getX() { return x; }
