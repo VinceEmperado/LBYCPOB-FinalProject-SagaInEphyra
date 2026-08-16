@@ -161,6 +161,14 @@ public abstract class EnemyController {
         return currentHealth <= 0;
     }
 
+    public int getCurrentPhase() {
+        return currentPhase;
+    }
+
+    public double getHealthPercentage() {
+        return maxHealth > 0 ? (currentHealth / maxHealth) : 0.0;
+    }
+
     public double getX() { return x; }
     public double getY() { return y; }
     public int getWidth() { return width; }

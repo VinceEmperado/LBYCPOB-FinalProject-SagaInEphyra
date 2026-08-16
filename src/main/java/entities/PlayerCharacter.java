@@ -113,6 +113,10 @@ public class PlayerCharacter {
         this.invulnerabilityTimer = invulnerabilityDuration; // Grant i-frames
     }
 
+    public double getHealth() {
+        return healthSystem.getCurrentHealth();
+    }
+
     public boolean isInvulnerable() {
         return invulnerabilityTimer > 0;
     }
