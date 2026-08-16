@@ -1,6 +1,7 @@
 package core;
 
 import combat.PatternSpawner;
+import entities.enemies.Clawdia;
 import entities.enemies.EnemyController;
 import entities.PlayerCharacter;
 import pools.BulletPool;
@@ -20,7 +21,7 @@ public class GameLauncher extends Application {
         PatternSpawner patternSpawner = new PatternSpawner(bulletPool);
 
         PlayerCharacter player = new PlayerCharacter(780, 800);
-        EnemyController enemy = new EnemyController(100, 150, patternSpawner);
+        EnemyController enemy = new Clawdia(100, 150, patternSpawner, player);
 
         GamePanel gamePanel = new GamePanel(player, enemy, bulletPool);
         GameLoopManager loopManager = new GameLoopManager(gamePanel, player, enemy);
