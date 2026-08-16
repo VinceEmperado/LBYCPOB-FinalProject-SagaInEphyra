@@ -4,37 +4,32 @@ import combat.PatternSpawner;
 import entities.EnemyController;
 import entities.PlayerCharacter;
 import pools.BulletPool;
+import ui.TestersMenu;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 public class GameLauncher extends Application {
+
+    @Override
     public void start(Stage primaryStage) {
-        // 1. Initialize bullet handling infrastructure
         BulletPool bulletPool = new BulletPool(1000);
         PatternSpawner patternSpawner = new PatternSpawner(bulletPool);
 
-        // 2. Instantiate entities (passing patternSpawner to enemy)
         PlayerCharacter player = new PlayerCharacter(780, 800);
         EnemyController enemy = new EnemyController(100, 150, patternSpawner);
 
-        // 3. Instantiate GamePanel with bulletPool for rendering/updates
         GamePanel gamePanel = new GamePanel(player, enemy, bulletPool);
         GameLoopManager loopManager = new GameLoopManager(gamePanel, player, enemy);
 
-        Pane root = new Pane(gamePanel);
+        // Passed player as the 3rd argument here
+        Scene scene = createGameScene(gamePanel, bulletPool, player);
 
-        // Sets the scene dimensions
-        Scene scene = new Scene(root, 1600, 900);
-
-        // Title bar
         primaryStage.setTitle("Saga in Ephyra");
-
-        // Prevents users from resizing the window
         primaryStage.setResizable(false);
-
         primaryStage.setScene(scene);
         primaryStage.show();
         primaryStage.centerOnScreen();
@@ -43,7 +38,21 @@ public class GameLauncher extends Application {
         loopManager.start();
     }
 
-    public static void main(String[] args) {
-        launch(args);
+    private Scene createGameScene(GamePanel gamePanel, BulletPool bulletPool, PlayerCharacter player) {
+        TestersMenu testersMenu = new TestersMenu(bulletPool, 1600, 900, player);
+        testersMenu.setLayoutX(10);
+        testersMenu.setLayoutY(10);
+        testersMenu.setPrefHeight(400);
+
+        Pane root = new Pane(gamePanel, testersMenu);
+        Scene scene = new Scene(root, 1600, 900);
+
+        scene.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.F1) {
+                testersMenu.setVisible(!testersMenu.isVisible());
+            }
+        });
+
+        return scene;
     }
 }
