@@ -1,15 +1,15 @@
 package entities.boss;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 public abstract class BossController {
     protected double x, y;
     protected int width = 120, height = 120;
-    protected BufferedImage bossSprite;
+    protected Image bossSprite;
 
     protected int currentPhase = 1; // 1 = Phase 1, 2 = Phase 2, 3 = Enraged
     protected double survivalTimer = 0.0;
@@ -31,7 +31,7 @@ public abstract class BossController {
         // load boss sprite
         try {
             if (imagePath != null) {
-                bossSprite = ImageIO.read(getClass().getResourceAsStream(imagePath));
+                bossSprite = new Image(getClass().getResourceAsStream(imagePath));
             }
         } catch (Exception e) {
             System.out.println("Custom sprite not found. Defaulting to Mart.");
@@ -40,14 +40,14 @@ public abstract class BossController {
         // fallback to mart
         if (bossSprite == null) {
             try {
-                bossSprite = ImageIO.read(getClass().getResourceAsStream("/sprites/boss/mart.png"));
+                bossSprite = new Image(getClass().getResourceAsStream("/sprites/boss/mart.png"));
             } catch (Exception ex) {
                 System.err.println("Could not load mart.");
             }
         }
     }
 
-    public void update(double delta, int panelWidth, int panelHeight) {
+    public void update(double delta, double panelWidth, double panelHeight) {
         // stop attacking and just count down the dialogue timer
         if (isTransitioning) {
             dialogueTimer += delta;
@@ -55,7 +55,7 @@ public abstract class BossController {
             if (dialogueTimer >= dialogueDuration) {
                 isTransitioning = false;
                 dialogueTimer = 0;
-                currentPhase++; //
+                currentPhase++;
             }
             return; // early exit to prevent attacks
         }
@@ -83,39 +83,47 @@ public abstract class BossController {
 
         // enraged
         else if (currentPhase == 3 && currentHealth <= 0) {
+            // TODO: Boss death logic
             System.out.println("Boss defeated");
         }
 
         performAttackPattern(delta, panelWidth, panelHeight);
     }
 
-    protected abstract void performAttackPattern(double delta, int panelWidth, int panelHeight);
+    protected abstract void performAttackPattern(double delta, double panelWidth, double panelHeight);
     protected abstract String getPhaseTwoDialogue();
     protected abstract String getEnragedDialogue();
 
-    public void render(Graphics2D g2d) {
+    public void render(GraphicsContext gc) {
+        renderSprite(gc);
+        renderUI(gc);
+    }
+
+    protected void renderSprite(GraphicsContext gc) {
         // sprite
         if (bossSprite != null) {
-            g2d.drawImage(bossSprite, (int) x, (int) y, width, height, null);
+            gc.drawImage(bossSprite, x, y, width, height);
         } else {
-            g2d.setColor(Color.YELLOW);
-            g2d.fillRect((int) x, (int) y, width, height);
+            gc.setFill(Color.YELLOW);
+            gc.fillRect(x, y, width, height);
         }
+    }
 
+    protected void renderUI(GraphicsContext gc) {
         // hp bar for phase 3
         if (currentPhase == 3 && !isTransitioning) {
-            g2d.setColor(Color.RED);
-            g2d.fillRect((int)x, (int)y - 20, width, 10);
-            g2d.setColor(Color.GREEN);
-            int healthWidth = (int)((currentHealth / (double)maxHealth) * width);
-            g2d.fillRect((int)x, (int)y - 20, healthWidth, 10);
+            gc.setFill(Color.RED);
+            gc.fillRect(x, y - 20, width, 10);
+            gc.setFill(Color.GREEN);
+            double healthWidth = ((double) currentHealth / maxHealth) * width;
+            gc.fillRect(x, y - 20, healthWidth, 10);
         }
 
         // text
         if (isTransitioning) {
-            g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Arial", Font.BOLD, 16));
-            g2d.drawString(currentDialogueText, (int)x - 40, (int)y - 30);
+            gc.setFill(Color.WHITE);
+            gc.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+            gc.fillText(currentDialogueText, x - 40, y - 30);
         }
     }
 
