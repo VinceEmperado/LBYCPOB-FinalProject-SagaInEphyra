@@ -3,6 +3,8 @@ package core;
 import entities.enemies.EnemyController;
 import entities.PlayerCharacter;
 import pools.BulletPool;
+import ui.DialogueSystem;
+import ui.GameHudManager;
 import ui.GameOverMenu;
 
 import javafx.scene.canvas.Canvas;
@@ -18,6 +20,9 @@ public class GamePanel extends Canvas {
     private final BulletPool bulletPool;
     private final BulletPool playerBulletPool;
     private GameOverMenu gameOverMenu;
+    private final ScoreManager scoreManager = new ScoreManager();
+    private final GameHudManager hudManager = new GameHudManager(scoreManager);
+    private final DialogueSystem dialogueSystem = new DialogueSystem();
 
     private boolean up, down, left, right, slowDown, shooting;
 
@@ -52,6 +57,10 @@ public class GamePanel extends Canvas {
         }
     }
 
+    public ScoreManager getScoreManager() { return scoreManager; }
+    public GameHudManager getHudManager() { return hudManager; }
+    public DialogueSystem getDialogueSystem() { return dialogueSystem; }
+
     public void resetInputKeys() {
         up = false;
         down = false;
@@ -64,9 +73,11 @@ public class GamePanel extends Canvas {
     public void render() {
         GraphicsContext gc = getGraphicsContext2D();
 
+        // Background
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, getWidth(), getHeight());
 
+        // Game Entities & Bullets
         if (enemy != null) {
             enemy.render(gc);
         }
@@ -80,6 +91,12 @@ public class GamePanel extends Canvas {
 
         if (playerBulletPool != null) {
             playerBulletPool.render(gc);
+        }
+
+        hudManager.render(gc, getWidth(), getHeight(), player, enemy);
+
+        if (dialogueSystem.isActive()) {
+            dialogueSystem.render(gc, getWidth(), getHeight());
         }
     }
 

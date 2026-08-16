@@ -84,6 +84,11 @@ public class GameLoopManager {
             gamePanel.getPlayerBulletPool().update(delta, gamePanel.getWidth(), gamePanel.getHeight());
         }
 
+        // Update Dialogue System UI timers (if dialogue is active)
+        if (gamePanel.getDialogueSystem() != null) {
+            gamePanel.getDialogueSystem().update(delta);
+        }
+
         checkPlayerBulletCollisions();
         checkEnemyBulletCollisions();
     }
@@ -97,6 +102,11 @@ public class GameLoopManager {
             if (isColliding(bullet, enemy.getX(), enemy.getY(), enemy.getWidth(), enemy.getHeight())) {
                 enemy.takeDamage(bullet.getDamagePacket().getAmount());
                 bullet.setActive(false); // Recycles bullet back into pool
+
+                // Award points to the ScoreManager on hit
+                if (gamePanel.getScoreManager() != null) {
+                    gamePanel.getScoreManager().addScore(100);
+                }
             }
         }
     }
@@ -111,6 +121,11 @@ public class GameLoopManager {
                     playerCharacter.getWidth(), playerCharacter.getHeight())) {
                 playerCharacter.takeDamage(bullet.getDamagePacket().getAmount());
                 bullet.setActive(false);
+
+                // Reset multiplier when player gets hit
+                if (gamePanel.getScoreManager() != null) {
+                    gamePanel.getScoreManager().resetMultiplier();
+                }
             }
         }
     }

@@ -3,94 +3,98 @@ package ui;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.util.function.Supplier;
+
 public class GameOverMenu extends VBox {
     private final Label titleLabel;
-    private final Label subtitleLabel;
     private final Button restartButton;
-    private final Button exitButton;
+    private final Button leaderboardButton;
+    private final Button menuButton;
+    private final Supplier<Integer> scoreSupplier;
 
-    public GameOverMenu(Runnable onRestart, Runnable onExit) {
-        // Overlay styling
-        this.setSpacing(20);
-        this.setAlignment(Pos.CENTER);
-        this.setStyle("-fx-background-color: rgba(0, 0, 0, 0.85); -fx-padding: 40;");
-        this.setVisible(false); // Hidden during active gameplay
+    public GameOverMenu(Runnable onRestart, Runnable onMenu) {
+        this(onRestart, onMenu, () -> 0);
+    }
 
-        // Title text
-        titleLabel = new Label("GAME OVER");
-        titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 48));
-        titleLabel.setTextFill(Color.RED);
+    public GameOverMenu(Runnable onRestart, Runnable onMenu, Supplier<Integer> scoreSupplier) {
+        this.scoreSupplier = scoreSupplier;
 
-        // Subtitle text
-        subtitleLabel = new Label("You ran out of lives!");
-        subtitleLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 20));
-        subtitleLabel.setTextFill(Color.WHITE);
+        setAlignment(Pos.CENTER);
+        setSpacing(20);
+        setStyle("-fx-background-color: rgba(0, 0, 0, 0.85);");
+        setVisible(false);
 
-        // Buttons
-        restartButton = createStyledButton("Try Again");
-        restartButton.setOnAction(e -> {
-            hide();
-            if (onRestart != null) onRestart.run();
+        titleLabel = new Label();
+        titleLabel.setFont(Font.font("Consolas", FontWeight.BOLD, 40));
+
+        restartButton = createStyledButton("PLAY AGAIN", onRestart);
+
+        leaderboardButton = createStyledButton("VIEW LEADERBOARD", () -> {
+            if (getParent() instanceof StackPane root) {
+                int currentScore = scoreSupplier != null ? scoreSupplier.get() : 0;
+
+                final LeaderboardMenu[] menuHolder = new LeaderboardMenu[1];
+                menuHolder[0] = new LeaderboardMenu(currentScore, () -> {
+                    root.getChildren().remove(menuHolder[0]);
+                });
+                root.getChildren().add(menuHolder[0]);
+            }
         });
 
-        exitButton = createStyledButton("Exit");
-        exitButton.setOnAction(e -> {
-            if (onExit != null) onExit.run();
-        });
+        menuButton = createStyledButton("MAIN MENU", onMenu);
 
-        this.getChildren().addAll(titleLabel, subtitleLabel, restartButton, exitButton);
+        getChildren().addAll(titleLabel, restartButton, leaderboardButton, menuButton);
     }
 
     public void show(boolean victory) {
         if (victory) {
-            titleLabel.setText("VICTORY!");
-            titleLabel.setTextFill(Color.GOLD);
-            subtitleLabel.setText("You defeated the boss!");
+            titleLabel.setText("VICTORY");
+            titleLabel.setTextFill(Color.web("#00ffcc"));
         } else {
             titleLabel.setText("GAME OVER");
-            titleLabel.setTextFill(Color.RED);
-            subtitleLabel.setText("You ran out of lives!");
+            titleLabel.setTextFill(Color.web("#ff2a2a"));
         }
-        this.setVisible(true);
+        setVisible(true);
+        toFront();
     }
 
-    public void hide() {
-        this.setVisible(false);
-    }
-
-    private Button createStyledButton(String text) {
-        Button btn = new Button(text);
-        btn.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        btn.setPrefWidth(200);
-        btn.setStyle(
-                "-fx-background-color: #222222;" +
+    private Button createStyledButton(String text, Runnable action) {
+        Button button = new Button(text);
+        button.setFont(Font.font("Consolas", FontWeight.BOLD, 16));
+        button.setStyle(
+                "-fx-background-color: transparent;" +
+                        "-fx-border-color: #00ffcc;" +
+                        "-fx-border-width: 2px;" +
                         "-fx-text-fill: white;" +
-                        "-fx-border-color: #ffffff;" +
-                        "-fx-border-radius: 5;" +
-                        "-fx-background-radius: 5;" +
-                        "-fx-cursor: hand;"
+                        "-fx-padding: 10 25 10 25;"
         );
-        btn.setOnMouseEntered(e -> btn.setStyle(
-                "-fx-background-color: #444444;" +
-                        "-fx-text-fill: white;" +
-                        "-fx-border-color: #ffffff;" +
-                        "-fx-border-radius: 5;" +
-                        "-fx-background-radius: 5;" +
-                        "-fx-cursor: hand;"
+
+        button.setOnMouseEntered(e -> button.setStyle(
+                "-fx-background-color: #00ffcc;" +
+                        "-fx-border-color: #00ffcc;" +
+                        "-fx-border-width: 2px;" +
+                        "-fx-text-fill: black;" +
+                        "-fx-padding: 10 25 10 25;"
         ));
-        btn.setOnMouseExited(e -> btn.setStyle(
-                "-fx-background-color: #222222;" +
+
+        button.setOnMouseExited(e -> button.setStyle(
+                "-fx-background-color: transparent;" +
+                        "-fx-border-color: #00ffcc;" +
+                        "-fx-border-width: 2px;" +
                         "-fx-text-fill: white;" +
-                        "-fx-border-color: #ffffff;" +
-                        "-fx-border-radius: 5;" +
-                        "-fx-background-radius: 5;" +
-                        "-fx-cursor: hand;"
+                        "-fx-padding: 10 25 10 25;"
         ));
-        return btn;
+
+        button.setOnAction(e -> {
+            if (action != null) action.run();
+        });
+
+        return button;
     }
 }
