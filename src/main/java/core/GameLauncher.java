@@ -1,7 +1,7 @@
 package core;
 
 import combat.PatternSpawner;
-import entities.EnemyController;
+import entities.enemies.EnemyController;
 import entities.PlayerCharacter;
 import pools.BulletPool;
 import ui.TestersMenu;

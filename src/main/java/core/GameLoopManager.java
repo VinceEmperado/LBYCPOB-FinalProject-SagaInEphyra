@@ -1,9 +1,7 @@
 package core;
 
-import java.awt.*;
-import core.GamePanel;
 import entities.PlayerCharacter;
-import entities.EnemyController;
+import entities.enemies.EnemyController;
 import javafx.animation.AnimationTimer;
 
 // Purpose of this class is so that regardless of the device frame rate, the movement speed of the entities will remain the same

@@ -1,6 +1,6 @@
 package core;
 
-import entities.EnemyController;
+import entities.enemies.EnemyController;
 import entities.PlayerCharacter;
 import pools.BulletPool;
 
