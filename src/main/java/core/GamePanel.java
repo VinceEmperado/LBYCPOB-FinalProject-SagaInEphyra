@@ -3,30 +3,62 @@ package core;
 import entities.enemies.EnemyController;
 import entities.PlayerCharacter;
 import pools.BulletPool;
+import ui.GameOverMenu;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 public class GamePanel extends Canvas {
-    private PlayerCharacter player;
+    private final PlayerCharacter player;
     private EnemyController enemy;
-    private BulletPool bulletPool;
+    private final BulletPool bulletPool;
+    private final BulletPool playerBulletPool;
+    private GameOverMenu gameOverMenu;
 
-    private boolean up, down, left, right, slowDown;
+    private boolean up, down, left, right, slowDown, shooting;
 
     public GamePanel(PlayerCharacter player, EnemyController enemy, BulletPool bulletPool) {
+        this(player, enemy, bulletPool, new BulletPool(1000));
+    }
+
+    public GamePanel(PlayerCharacter player, EnemyController enemy, BulletPool bulletPool, BulletPool playerBulletPool) {
         super(1600, 900);
         this.player = player;
         this.enemy = enemy;
         this.bulletPool = bulletPool;
+        this.playerBulletPool = playerBulletPool;
 
         setFocusTraversable(true);
 
         setOnKeyPressed(this::keyPressed);
         setOnKeyReleased(this::keyReleased);
+    }
+
+    public StackPane createContainer(GameOverMenu menu) {
+        this.gameOverMenu = menu;
+        StackPane root = new StackPane();
+        root.getChildren().addAll(this, menu);
+        return root;
+    }
+
+    public void showGameOver(boolean victory) {
+        resetInputKeys();
+        if (gameOverMenu != null) {
+            gameOverMenu.show(victory);
+        }
+    }
+
+    public void resetInputKeys() {
+        up = false;
+        down = false;
+        left = false;
+        right = false;
+        slowDown = false;
+        shooting = false;
     }
 
     public void render() {
@@ -35,7 +67,6 @@ public class GamePanel extends Canvas {
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, getWidth(), getHeight());
 
-        // Render enemy and active bullets
         if (enemy != null) {
             enemy.render(gc);
         }
@@ -46,6 +77,10 @@ public class GamePanel extends Canvas {
         if (bulletPool != null) {
             bulletPool.render(gc);
         }
+
+        if (playerBulletPool != null) {
+            playerBulletPool.render(gc);
+        }
     }
 
     public void keyPressed(KeyEvent e) {
@@ -53,8 +88,9 @@ public class GamePanel extends Canvas {
         if (code == KeyCode.W || code == KeyCode.UP) up = true;
         if (code == KeyCode.S || code == KeyCode.DOWN) down = true;
         if (code == KeyCode.A || code == KeyCode.LEFT) left = true;
-        if (code == KeyCode.D|| code == KeyCode.RIGHT) right = true;
+        if (code == KeyCode.D || code == KeyCode.RIGHT) right = true;
         if (code == KeyCode.SHIFT) slowDown = true;
+        if (code == KeyCode.SPACE || code == KeyCode.Z || code == KeyCode.J) shooting = true;
     }
 
     public void keyReleased(KeyEvent e) {
@@ -62,8 +98,9 @@ public class GamePanel extends Canvas {
         if (code == KeyCode.W || code == KeyCode.UP) up = false;
         if (code == KeyCode.S || code == KeyCode.DOWN) down = false;
         if (code == KeyCode.A || code == KeyCode.LEFT) left = false;
-        if (code == KeyCode.D|| code == KeyCode.RIGHT) right = false;
+        if (code == KeyCode.D || code == KeyCode.RIGHT) right = false;
         if (code == KeyCode.SHIFT) slowDown = false;
+        if (code == KeyCode.SPACE || code == KeyCode.Z || code == KeyCode.J) shooting = false;
     }
 
     public boolean isUp() { return up; }
@@ -71,8 +108,18 @@ public class GamePanel extends Canvas {
     public boolean isLeft() { return left; }
     public boolean isRight() { return right; }
     public boolean isSlowDown() { return slowDown; }
+    public boolean isShooting() { return shooting; }
 
     public BulletPool getBulletPool() { return bulletPool; }
+    public BulletPool getPlayerBulletPool() { return playerBulletPool; }
+
+    public GameOverMenu getGameOverMenu() { return gameOverMenu; }
+    public void setGameOverMenu(GameOverMenu gameOverMenu) { this.gameOverMenu = gameOverMenu; }
+
+    @SuppressWarnings("unused")
     public EnemyController getEnemy() { return enemy; }
+
     public PlayerCharacter getPlayer() { return player; }
+
+    public void setEnemy(EnemyController enemy) { this.enemy = enemy; }
 }

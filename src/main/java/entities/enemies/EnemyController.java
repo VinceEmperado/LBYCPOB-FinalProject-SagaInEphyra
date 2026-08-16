@@ -19,8 +19,8 @@ public abstract class EnemyController {
     protected double survivalTimer = 0.0;
     protected double phaseOneDuration = 10.0;
 
-    protected int maxHealth = 50;
-    protected int currentHealth = 50;
+    protected double maxHealth = 500.0;
+    protected double currentHealth = 500.0;
 
     protected boolean isTransitioning = false;
     protected double dialogueTimer = 0.0;
@@ -54,6 +54,8 @@ public abstract class EnemyController {
     }
 
     public void update(double delta, double panelWidth, double panelHeight) {
+        if (isDead()) return;
+
         if (isTransitioning) {
             dialogueTimer += delta;
             if (dialogueTimer >= dialogueDuration) {
@@ -64,16 +66,13 @@ public abstract class EnemyController {
             return;
         }
 
+        // Phase 1 timer OR health threshold triggers phase transition
         if (currentPhase == 1) {
             survivalTimer += delta;
-            if (survivalTimer >= phaseOneDuration) {
+            if (survivalTimer >= phaseOneDuration || currentHealth <= 250.0) {
                 isTransitioning = true;
                 currentDialogueText = getEnragedDialogue();
             }
-        }
-
-        else if (currentPhase == 2 && currentHealth <= 0) {
-            // TODO: Death logic (e.g., set isDead flag, play animation)
         }
 
         if (currentPhase == 2 && currentHealth > 0 && !isTransitioning) {
@@ -92,7 +91,7 @@ public abstract class EnemyController {
     }
 
     public void checkOrbCollisions(PlayerCharacter player) {
-        if (player == null || currentPhase != 2) return;
+        if (player == null || currentPhase != 2 || isDead()) return;
 
         for (int i = activeOrbs.size() - 1; i >= 0; i--) {
             DamageOrb orb = activeOrbs.get(i);
@@ -113,6 +112,8 @@ public abstract class EnemyController {
     protected abstract String getEnragedDialogue();
 
     public void render(GraphicsContext gc) {
+        if (isDead()) return;
+
         renderSprite(gc);
         renderUI(gc);
     }
@@ -131,12 +132,12 @@ public abstract class EnemyController {
             orb.render(gc);
         }
 
-        if (currentPhase == 2 && !isTransitioning) {
+        if (!isTransitioning) {
             gc.setFill(Color.RED);
             gc.fillRect(x, y - 15, width, 8);
             gc.setFill(Color.GREEN);
-            double healthWidth = ((double) currentHealth / maxHealth) * width;
-            gc.fillRect(x, y - 15, healthWidth, 8);
+            double healthWidth = (currentHealth / maxHealth) * width;
+            gc.fillRect(x, y - 15, Math.max(0, healthWidth), 8);
         }
 
         if (isTransitioning) {
@@ -146,15 +147,24 @@ public abstract class EnemyController {
         }
     }
 
-    public void takeDamage(int amount) {
-        if (currentPhase == 2 && !isTransitioning) {
-            currentHealth -= amount;
-            if (currentHealth < 0) currentHealth = 0;
+    public void takeDamage(double amount) {
+        if (!isTransitioning) {
+            currentHealth = Math.max(0, currentHealth - amount);
         }
+    }
+
+    public void takeDamage(int amount) {
+        takeDamage((double) amount);
+    }
+
+    public boolean isDead() {
+        return currentHealth <= 0;
     }
 
     public double getX() { return x; }
     public double getY() { return y; }
     public int getWidth() { return width; }
     public int getHeight() { return height; }
+    public double getCurrentHealth() { return currentHealth; }
+    public double getMaxHealth() { return maxHealth; }
 }

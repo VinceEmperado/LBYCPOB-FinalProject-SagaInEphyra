@@ -1,16 +1,15 @@
 package core;
 
+import combat.Bullet;
 import entities.PlayerCharacter;
 import entities.enemies.EnemyController;
 import javafx.animation.AnimationTimer;
 
-// Purpose of this class is so that regardless of the device frame rate, the movement speed of the entities will remain the same
 public class GameLoopManager {
     private long lastTime = 0;
-    private boolean running = false;
-    private GamePanel gamePanel;
-    private PlayerCharacter playerCharacter;
-    private EnemyController enemy;
+    private final GamePanel gamePanel;
+    private final PlayerCharacter playerCharacter;
+    private EnemyController enemy; // Removed 'final' to allow swapping
     private final AnimationTimer timer;
 
     public GameLoopManager(GamePanel gamePanel, PlayerCharacter playerCharacter, EnemyController enemy) {
@@ -34,6 +33,10 @@ public class GameLoopManager {
         };
     }
 
+    public void setEnemy(EnemyController enemy) {
+        this.enemy = enemy;
+    }
+
     public void start() {
         lastTime = 0;
         timer.start();
@@ -43,15 +46,82 @@ public class GameLoopManager {
         timer.stop();
     }
 
-    // Updates the position of the player, enemy, and bullet entities
     private void update(double delta) {
-        playerCharacter.update(delta, gamePanel.isUp(), gamePanel.isDown(), gamePanel.isLeft(), gamePanel.isRight(), gamePanel.getWidth(), gamePanel.getHeight(), gamePanel.isSlowDown());
-        enemy.update(delta, gamePanel.getWidth(), gamePanel.getHeight());
+        if (playerCharacter != null && playerCharacter.isGameOver()) {
+            stop();
+            gamePanel.showGameOver(false);
+            return;
+        }
 
-        enemy.checkOrbCollisions(playerCharacter);
+        if (enemy != null && enemy.isDead()) {
+            stop();
+            gamePanel.showGameOver(true);
+            return;
+        }
 
+        playerCharacter.update(
+                delta,
+                gamePanel.isUp(),
+                gamePanel.isDown(),
+                gamePanel.isLeft(),
+                gamePanel.isRight(),
+                gamePanel.isShooting(),
+                gamePanel.getPlayerBulletPool(),
+                gamePanel.isSlowDown()
+        );
+
+        if (enemy != null && !enemy.isDead()) {
+            enemy.update(delta, gamePanel.getWidth(), gamePanel.getHeight());
+            enemy.checkOrbCollisions(playerCharacter);
+        }
+
+        // Update Bullet Pools
         if (gamePanel.getBulletPool() != null) {
             gamePanel.getBulletPool().update(delta, gamePanel.getWidth(), gamePanel.getHeight());
         }
+
+        if (gamePanel.getPlayerBulletPool() != null) {
+            gamePanel.getPlayerBulletPool().update(delta, gamePanel.getWidth(), gamePanel.getHeight());
+        }
+
+        checkPlayerBulletCollisions();
+        checkEnemyBulletCollisions();
+    }
+
+    private void checkPlayerBulletCollisions() {
+        if (enemy == null || enemy.isDead() || gamePanel.getPlayerBulletPool() == null) return;
+
+        for (Bullet bullet : gamePanel.getPlayerBulletPool().getActiveBullets()) {
+            if (!bullet.isActive()) continue;
+
+            if (isColliding(bullet, enemy.getX(), enemy.getY(), enemy.getWidth(), enemy.getHeight())) {
+                enemy.takeDamage(bullet.getDamagePacket().getAmount());
+                bullet.setActive(false); // Recycles bullet back into pool
+            }
+        }
+    }
+
+    private void checkEnemyBulletCollisions() {
+        if (playerCharacter == null || playerCharacter.isDead() || gamePanel.getBulletPool() == null) return;
+
+        for (Bullet bullet : gamePanel.getBulletPool().getActiveBullets()) {
+            if (!bullet.isActive()) continue;
+
+            if (isColliding(bullet, playerCharacter.getX(), playerCharacter.getY(),
+                    playerCharacter.getWidth(), playerCharacter.getHeight())) {
+                playerCharacter.takeDamage(bullet.getDamagePacket().getAmount());
+                bullet.setActive(false);
+            }
+        }
+    }
+
+    private boolean isColliding(Bullet bullet, double rx, double ry, double rw, double rh) {
+        double closestX = Math.clamp(bullet.getX(), rx, rx + rw);
+        double closestY = Math.clamp(bullet.getY(), ry, ry + rh);
+
+        double distX = bullet.getX() - closestX;
+        double distY = bullet.getY() - closestY;
+
+        return (distX * distX + distY * distY) < (bullet.getRadius() * bullet.getRadius());
     }
 }

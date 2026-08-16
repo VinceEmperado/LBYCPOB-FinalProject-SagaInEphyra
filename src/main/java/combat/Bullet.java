@@ -84,6 +84,17 @@ public class Bullet {
         }
     }
 
+    public double getDamage() {
+        return damagePacket != null ? damagePacket.getAmount() : 0.0;
+    }
+
+    public double getRadius() {
+        if (sprite != null) {
+            return Math.max(sprite.getWidth(), sprite.getHeight()) / 2.0;
+        }
+        return 6.0; // Fallback radius
+    }
+
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
     public double getX() { return x; }
