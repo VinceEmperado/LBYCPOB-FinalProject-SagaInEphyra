@@ -1,8 +1,10 @@
 package core;
 
+import combat.PatternSpawner;
 import entities.enemies.EnemyController;
 import entities.PlayerCharacter;
 import pools.BulletPool;
+import pools.ItemPool;
 import ui.DialogueSystem;
 import ui.GameHudManager;
 import ui.GameOverMenu;
@@ -13,12 +15,16 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 
 public class GamePanel extends Canvas {
     private final PlayerCharacter player;
     private EnemyController enemy;
     private final BulletPool bulletPool;
     private final BulletPool playerBulletPool;
+    private final ItemPool itemPool;
+    private final StageDirector stageDirector;
     private GameOverMenu gameOverMenu;
     private final ScoreManager scoreManager = new ScoreManager();
     private final GameHudManager hudManager = new GameHudManager(scoreManager);
@@ -31,11 +37,32 @@ public class GamePanel extends Canvas {
     }
 
     public GamePanel(PlayerCharacter player, EnemyController enemy, BulletPool bulletPool, BulletPool playerBulletPool) {
+        // Pass bulletPool into the PatternSpawner constructor
+        this(player, enemy, bulletPool, playerBulletPool, new PatternSpawner(bulletPool));
+    }
+
+    public GamePanel(PlayerCharacter player, EnemyController enemy, BulletPool bulletPool, BulletPool playerBulletPool, PatternSpawner patternSpawner) {
         super(1600, 900);
         this.player = player;
-        this.enemy = enemy;
         this.bulletPool = bulletPool;
         this.playerBulletPool = playerBulletPool;
+        this.itemPool = new ItemPool(20);
+
+        // Fallback to a new spawner with bulletPool if null is passed
+        PatternSpawner spawnerToUse = (patternSpawner != null) ? patternSpawner : new PatternSpawner(bulletPool);
+
+        this.stageDirector = new StageDirector(
+                spawnerToUse,
+                player,
+                this.itemPool,
+                newBoss -> this.enemy = newBoss
+        );
+
+        if (this.stageDirector.getCurrentEnemy() != null) {
+            this.enemy = this.stageDirector.getCurrentEnemy();
+        } else {
+            this.enemy = enemy;
+        }
 
         setFocusTraversable(true);
 
@@ -60,6 +87,8 @@ public class GamePanel extends Canvas {
     public ScoreManager getScoreManager() { return scoreManager; }
     public GameHudManager getHudManager() { return hudManager; }
     public DialogueSystem getDialogueSystem() { return dialogueSystem; }
+    public StageDirector getStageDirector() { return stageDirector; }
+    public ItemPool getItemPool() { return itemPool; }
 
     public void resetInputKeys() {
         up = false;
@@ -70,6 +99,33 @@ public class GamePanel extends Canvas {
         shooting = false;
     }
 
+    public void update(double delta) {
+        if (stageDirector != null) {
+            if (stageDirector.isAllStagesCleared()) {
+                showGameOver(true);
+                return;
+            }
+
+            stageDirector.update();
+            this.enemy = stageDirector.getCurrentEnemy();
+        }
+
+        if (itemPool != null && player != null) {
+            itemPool.update(delta, player);
+        }
+
+        if (player != null) {
+            player.update(delta, up, down, left, right, shooting, playerBulletPool, slowDown);
+            if (player.isGameOver()) {
+                showGameOver(false);
+            }
+        }
+
+        if (enemy != null && !enemy.isDead()) {
+            enemy.update(delta, getWidth(), getHeight());
+        }
+    }
+
     public void render() {
         GraphicsContext gc = getGraphicsContext2D();
 
@@ -77,8 +133,13 @@ public class GamePanel extends Canvas {
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, getWidth(), getHeight());
 
+        // Item Drops
+        if (itemPool != null) {
+            itemPool.render(gc);
+        }
+
         // Game Entities & Bullets
-        if (enemy != null) {
+        if (enemy != null && !enemy.isDead()) {
             enemy.render(gc);
         }
         if (player != null) {
@@ -94,6 +155,13 @@ public class GamePanel extends Canvas {
         }
 
         hudManager.render(gc, getWidth(), getHeight(), player, enemy);
+
+        // Stage HUD Title Header
+        if (stageDirector != null) {
+            gc.setFill(Color.WHITE);
+            gc.setFont(Font.font("Consolas", FontWeight.BOLD, 18));
+            gc.fillText(stageDirector.getCurrentStageTitle(), 20, 30);
+        }
 
         if (dialogueSystem.isActive()) {
             dialogueSystem.render(gc, getWidth(), getHeight());

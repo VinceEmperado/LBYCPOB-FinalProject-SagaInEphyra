@@ -12,19 +12,35 @@ import javafx.scene.text.Text;
 
 public class MainMenu extends StackPane {
 
-    public MainMenu(Runnable onStart, Runnable onExit) {
+    public MainMenu(Runnable onLogin, Runnable onStart, Runnable onLeaderboard, Runnable onExit) {
         setPrefSize(1600, 900);
         setStyle("-fx-background-color: black;");
 
         Text title = new Text("Saga in Ephyra");
         title.setFill(Color.WHITE);
-        title.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 36));
+
+        Button loginButton = new Button("Log in");
+        styleButton(loginButton);
+        loginButton.setOnAction(e -> {
+            if (onLogin != null) {
+                onLogin.run();
+            }
+        });
 
         Button startButton = new Button("Start");
         styleButton(startButton);
         startButton.setOnAction(e -> {
             if (onStart != null) {
                 onStart.run();
+            }
+        });
+
+        Button leaderboardButton = new Button("Leaderboard");
+        styleButton(leaderboardButton);
+        leaderboardButton.setOnAction(e -> {
+            if (onLeaderboard != null) {
+                onLeaderboard.run();
             }
         });
 
@@ -36,7 +52,7 @@ public class MainMenu extends StackPane {
             }
         });
 
-        VBox layout = new VBox(30, title, startButton, exitButton);
+        VBox layout = new VBox(25, title, loginButton, startButton, leaderboardButton, exitButton);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(40));
 
@@ -44,9 +60,12 @@ public class MainMenu extends StackPane {
     }
 
     private void styleButton(Button button) {
-        button.setFont(Font.font("Arial",  FontWeight.BOLD, 20));
+        button.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         button.setPrefWidth(240);
         button.setPrefHeight(50);
         button.setStyle("-fx-background-color: #222222; -fx-text-fill: white; -fx-border-color: white; -fx-border-width: 2;");
+
+        button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: #00ffcc; -fx-text-fill: black; -fx-border-color: white; -fx-border-width: 2;"));
+        button.setOnMouseExited(e -> button.setStyle("-fx-background-color: #222222; -fx-text-fill: white; -fx-border-color: white; -fx-border-width: 2;"));
     }
 }

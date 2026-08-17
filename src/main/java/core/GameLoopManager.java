@@ -9,7 +9,7 @@ public class GameLoopManager {
     private long lastTime = 0;
     private final GamePanel gamePanel;
     private final PlayerCharacter playerCharacter;
-    private EnemyController enemy; // Removed 'final' to allow swapping
+    private EnemyController enemy;
     private final AnimationTimer timer;
 
     public GameLoopManager(GamePanel gamePanel, PlayerCharacter playerCharacter, EnemyController enemy) {
@@ -47,35 +47,34 @@ public class GameLoopManager {
     }
 
     private void update(double delta) {
+        // 1. Sync current enemy from GamePanel (in case StageDirector swapped bosses)
+        if (gamePanel.getEnemy() != null) {
+            this.enemy = gamePanel.getEnemy();
+        }
+
+        // 2. Check Defeat Condition
         if (playerCharacter != null && playerCharacter.isGameOver()) {
             stop();
             gamePanel.showGameOver(false);
             return;
         }
 
-        if (enemy != null && enemy.isDead()) {
+        // 3. Check Victory Condition (Only when StageDirector clears ALL stages)
+        if (gamePanel.getStageDirector() != null && gamePanel.getStageDirector().isAllStagesCleared()) {
             stop();
             gamePanel.showGameOver(true);
             return;
         }
 
-        playerCharacter.update(
-                delta,
-                gamePanel.isUp(),
-                gamePanel.isDown(),
-                gamePanel.isLeft(),
-                gamePanel.isRight(),
-                gamePanel.isShooting(),
-                gamePanel.getPlayerBulletPool(),
-                gamePanel.isSlowDown()
-        );
+        // 4. Update GamePanel, StageDirector, and Item Pools
+        gamePanel.update(delta);
 
+        // 5. Update Active Boss logic & Orbs
         if (enemy != null && !enemy.isDead()) {
-            enemy.update(delta, gamePanel.getWidth(), gamePanel.getHeight());
             enemy.checkOrbCollisions(playerCharacter);
         }
 
-        // Update Bullet Pools
+        // 6. Update Bullet Pools
         if (gamePanel.getBulletPool() != null) {
             gamePanel.getBulletPool().update(delta, gamePanel.getWidth(), gamePanel.getHeight());
         }
@@ -84,11 +83,12 @@ public class GameLoopManager {
             gamePanel.getPlayerBulletPool().update(delta, gamePanel.getWidth(), gamePanel.getHeight());
         }
 
-        // Update Dialogue System UI timers (if dialogue is active)
+        // 7. Update Dialogue System UI timers
         if (gamePanel.getDialogueSystem() != null) {
             gamePanel.getDialogueSystem().update(delta);
         }
 
+        // 8. Check Collisions
         checkPlayerBulletCollisions();
         checkEnemyBulletCollisions();
     }

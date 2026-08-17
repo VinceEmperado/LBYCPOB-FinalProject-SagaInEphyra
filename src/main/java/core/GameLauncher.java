@@ -6,6 +6,8 @@ import entities.enemies.EnemyController;
 import entities.PlayerCharacter;
 import pools.BulletPool;
 import ui.GameOverMenu;
+import ui.LeaderboardMenu;
+import ui.LoginMenu;
 import ui.MainMenu;
 import ui.TestersMenu;
 
@@ -33,14 +35,41 @@ public class GameLauncher extends Application {
     }
 
     private void showMainMenu(Stage primaryStage) {
-        // MainMenu lives in this same package (core), so no import is needed.
+        // Matched callbacks with MainMenu(onLogin, onStart, onLeaderboard, onExit)
         MainMenu mainMenu = new MainMenu(
+                () -> showLoginMenu(primaryStage),
                 () -> startGame(primaryStage),
+                () -> showLeaderboardMenu(primaryStage),
                 () -> System.exit(0)
         );
 
         Scene menuScene = new Scene(mainMenu, 1600, 900);
         primaryStage.setScene(menuScene);
+    }
+
+    private void showLoginMenu(Stage primaryStage) {
+        LoginMenu loginMenu = new LoginMenu(
+                (username, password) -> {
+                    // Handle login submission logic (e.g., authenticate user)
+                    System.out.println("User logged in: " + username);
+                    showMainMenu(primaryStage);
+                },
+                () -> showMainMenu(primaryStage)
+        );
+
+        Scene loginScene = new Scene(loginMenu, 1600, 900);
+        primaryStage.setScene(loginScene);
+    }
+
+    private void showLeaderboardMenu(Stage primaryStage) {
+        // Opens leaderboard from the main menu with default 0 current score view
+        LeaderboardMenu leaderboardMenu = new LeaderboardMenu(
+                0,
+                () -> showMainMenu(primaryStage)
+        );
+
+        Scene leaderboardScene = new Scene(leaderboardMenu, 1600, 900);
+        primaryStage.setScene(leaderboardScene);
     }
 
     private void startGame(Stage primaryStage) {
@@ -53,14 +82,16 @@ public class GameLauncher extends Application {
         GamePanel gamePanel = new GamePanel(player, enemy, bulletPool);
         loopManager = new GameLoopManager(gamePanel, player, enemy);
 
-        // Instantiate GameOverMenu with callbacks
+        // GameOverMenu returns to main menu on exit
         GameOverMenu gameOverMenu = new GameOverMenu(
                 () -> restartGame(primaryStage),
-                () -> System.exit(0)
+                () -> {
+                    if (loopManager != null) loopManager.stop();
+                    showMainMenu(primaryStage);
+                }
         );
         gamePanel.setGameOverMenu(gameOverMenu);
 
-        // Pass patternSpawner to createGameScene
         Scene scene = createGameScene(gamePanel, bulletPool, player, patternSpawner, gameOverMenu);
 
         primaryStage.setScene(scene);
@@ -97,8 +128,6 @@ public class GameLauncher extends Application {
         StackPane root = new StackPane(gamePanel, testersOverlay, gameOverMenu);
         Scene scene = new Scene(root, 1600, 900);
 
-        // Makes it so that the player character can still move even after clicking on the tester menu
-        // Direct consequence: While browsing the menu with arrow keys, then the player will also move up and down
         scene.addEventFilter(KeyEvent.KEY_PRESSED, gamePanel::keyPressed);
         scene.addEventFilter(KeyEvent.KEY_RELEASED, gamePanel::keyReleased);
 
@@ -115,8 +144,6 @@ public class GameLauncher extends Application {
         if (loopManager != null) {
             loopManager.stop();
         }
-        // Goes straight back into a fresh game rather than back to the main
-        // menu - "Play Again" should restart, not require re-navigating menus.
         startGame(stage);
     }
 
