@@ -41,6 +41,8 @@ public class GameLauncher extends Application {
     }
 
     private void showMainMenu(Stage primaryStage) {
+        AudioManager.getInstance().playBGM("/audio/bgm/menu_theme.mp3", true);
+
         MainMenu mainMenu = new MainMenu(
                 () -> showLoginMenu(primaryStage),
                 () -> startGame(primaryStage),
@@ -123,12 +125,17 @@ public class GameLauncher extends Application {
                 gamePanel.getStageDirector().setCurrentStageIndex(stageIndex);
             }
             System.out.println("Loaded game save | Score: " + score + " | Stage Index: " + stageIndex);
+        } else {
+            if (gamePanel.getStageDirector() != null) {
+                gamePanel.getStageDirector().setCurrentStageIndex(0);
+            }
         }
 
         // Pause Menu Callbacks
         PauseMenu pauseMenu = new PauseMenu(
                 () -> {
                     gamePanel.setPaused(false);
+                    AudioManager.getInstance().resumeBGM();
                     gamePanel.requestFocus();
                 },
                 () -> saveGame(gamePanel),
@@ -190,7 +197,10 @@ public class GameLauncher extends Application {
         scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
             if (e.getCode() == KeyCode.ESCAPE || e.getCode() == KeyCode.P) {
                 gamePanel.togglePause();
-                if (!gamePanel.isPaused()) {
+                if (gamePanel.isPaused()) {
+                    AudioManager.getInstance().pauseBGM();
+                } else {
+                    AudioManager.getInstance().resumeBGM();
                     gamePanel.requestFocus();
                 }
                 e.consume();
@@ -227,6 +237,7 @@ public class GameLauncher extends Application {
         if (loopManager != null) {
             loopManager.stop();
         }
+        AudioManager.getInstance().stopBGM();
         startGame(stage);
     }
 

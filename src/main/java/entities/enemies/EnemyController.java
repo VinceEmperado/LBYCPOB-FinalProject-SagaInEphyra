@@ -158,14 +158,6 @@ public abstract class EnemyController {
             orb.render(gc);
         }
 
-        if (!isTransitioning) {
-            gc.setFill(Color.RED);
-            gc.fillRect(x, y - 15, width, 8);
-            gc.setFill(Color.GREEN);
-            double healthWidth = (currentHealth / maxHealth) * width;
-            gc.fillRect(x, y - 15, Math.max(0, healthWidth), 8);
-        }
-
         if (isTransitioning && dialogueSystem == null) {
             gc.setFill(Color.WHITE);
             gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));

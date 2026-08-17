@@ -85,16 +85,6 @@ public abstract class BossController extends EnemyController {
 
     @Override
     protected void renderUI(GraphicsContext gc) {
-        // Enraged phase HP bar
-        if (currentPhase == 3 && !isTransitioning) {
-            gc.setFill(Color.RED);
-            gc.fillRect(x, y - 20, width, 10);
-            gc.setFill(Color.GREEN);
-
-            double healthWidth = healthSystem.getHealthPercentage() * width;
-            gc.fillRect(x, y - 20, healthWidth, 10);
-        }
-
         if (isTransitioning && dialogueSystem == null) {
             gc.setFill(Color.WHITE);
             gc.setFont(Font.font("Arial", FontWeight.BOLD, 16));

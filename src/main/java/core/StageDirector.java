@@ -46,6 +46,7 @@ public class StageDirector {
         currentStageIndex++;
         if (currentStageIndex > 4) {
             allStagesCleared = true;
+            AudioManager.getInstance().playBGM("/audio/bgm/victory.mp3", false);
             return;
         }
         loadStageBoss(currentStageIndex);
@@ -53,13 +54,29 @@ public class StageDirector {
 
     private void loadStageBoss(int index) {
         switch (index) {
-            case 0 -> currentEnemy = new Clawdia(780, 150, patternSpawner, player);
-            case 1 -> currentEnemy = new Kanaloa(780, 150, patternSpawner, player);
-            case 2 -> currentEnemy = new Finana(780, 150, patternSpawner, player);
-            case 3 -> currentEnemy = new Thalasaa(780, 150, patternSpawner, player);
-            case 4 -> currentEnemy = new Skana(780, 150, patternSpawner, player);
+            case 0 -> {
+                currentEnemy = new Clawdia(780, 150, patternSpawner, player);
+                AudioManager.getInstance().playBGM("/audio/bgm/stage1_clawdia.mp3", true);
+            }
+            case 1 -> {
+                currentEnemy = new Kanaloa(780, 150, patternSpawner, player);
+                AudioManager.getInstance().playBGM("/audio/bgm/stage1_kanaloa.mp3", true);
+            }
+            case 2 -> {
+                currentEnemy = new Finana(780, 150, patternSpawner, player);
+                AudioManager.getInstance().playBGM("/audio/bgm/stage2_finana.mp3", true);
+            }
+            case 3 -> {
+                currentEnemy = new Thalasaa(780, 150, patternSpawner, player);
+                AudioManager.getInstance().playBGM("/audio/bgm/stage2_thalasaa.mp3", true);
+            }
+            case 4 -> {
+                currentEnemy = new Skana(780, 150, patternSpawner, player);
+                AudioManager.getInstance().playBGM("/audio/bgm/final_skana.mp3", true);
+            }
             default -> {
                 allStagesCleared = true;
+                AudioManager.getInstance().playBGM("/audio/bgm/victory.mp3", false);
                 return;
             }
         }
@@ -81,6 +98,7 @@ public class StageDirector {
         this.currentStageIndex = currentStageIndex;
         if (this.currentStageIndex > 4) {
             this.allStagesCleared = true;
+            AudioManager.getInstance().playBGM("/audio/bgm/victory.mp3", false);
         } else {
             this.allStagesCleared = false;
             loadStageBoss(this.currentStageIndex);
