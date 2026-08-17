@@ -23,10 +23,11 @@ public class PlayerCharacter {
     private final double invulnerabilityDuration = 2.0; // 2 seconds of i-frames after respawning
     private boolean godMode = false;
 
-    // Shooting controls & cooldowns
+    // Shooting controls, damage & cooldowns
     private double shootCooldown = 0.0;
     private final double shootInterval = 0.10;
     private final double playerBulletSpeed = 600.0;
+    private double bulletDamage = 15.0;
 
     public PlayerCharacter(double startX, double startY) {
         this(startX, startY, 100.0, 3); // Default 100 HP, 3 Lives
@@ -86,14 +87,13 @@ public class PlayerCharacter {
                 spawnYPosition,
                 0.0,
                 -playerBulletSpeed,
-                15.0,
+                bulletDamage,
                 bulletSprite,
                 Color.CYAN
         );
     }
 
     public void takeDamage(double amount) {
-        // Prevents health loss when godMode, invulnerability, or game over is active
         if (godMode || isInvulnerable() || isGameOver()) return;
 
         healthSystem.takeDamage(amount);
@@ -110,7 +110,7 @@ public class PlayerCharacter {
         this.x = spawnX;
         this.y = spawnY;
         this.healthSystem.reset();
-        this.invulnerabilityTimer = invulnerabilityDuration; // Grant i-frames
+        this.invulnerabilityTimer = invulnerabilityDuration;
     }
 
     public double getHealth() {
@@ -135,6 +135,24 @@ public class PlayerCharacter {
 
     public boolean isGodMode() {
         return godMode;
+    }
+
+    public void addLife(int amount) {
+        this.lives += amount;
+    }
+
+    public void heal(double amount) {
+        if (this.healthSystem != null) {
+            this.healthSystem.heal(amount);
+        }
+    }
+
+    public void increaseBulletDamage(double amount) {
+        this.bulletDamage += amount;
+    }
+
+    public double getBulletDamage() {
+        return bulletDamage;
     }
 
     public void render(GraphicsContext gc) {
