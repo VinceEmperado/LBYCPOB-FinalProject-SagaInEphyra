@@ -51,7 +51,7 @@ public class Clawdia extends EnemyController {
     }
 
     public Clawdia(double startX, double startY, double maxHealth, PatternSpawner patternSpawner, PlayerCharacter player, DialogueSystem dialogueSystem) {
-        super(startX, startY, "/sprites/enemies/clawdia.png", patternSpawner);
+        super(startX, startY, "/sprites/enemy/clawdia.png", patternSpawner);
         this.player = player;
         this.dialogueSystem = dialogueSystem;
 
