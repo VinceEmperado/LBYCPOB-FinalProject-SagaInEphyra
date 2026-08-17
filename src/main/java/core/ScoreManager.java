@@ -12,7 +12,6 @@ public class ScoreManager {
         this.multiplier = 1.0;
     }
 
-    
     public void addScore(long basePoints) {
         if (basePoints <= 0) return;
 
@@ -24,6 +23,12 @@ public class ScoreManager {
         }
     }
 
+    public void setScore(long score) {
+        this.currentScore = Math.max(0, score);
+        if (this.currentScore > this.highScore) {
+            this.highScore = this.currentScore;
+        }
+    }
 
     public void setMultiplier(double multiplier) {
         this.multiplier = Math.max(1.0, multiplier);
@@ -36,7 +41,6 @@ public class ScoreManager {
     public void resetMultiplier() {
         this.multiplier = 1.0;
     }
-
 
     public void resetScore() {
         this.currentScore = 0;

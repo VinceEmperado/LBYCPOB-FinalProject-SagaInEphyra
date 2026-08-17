@@ -1,5 +1,6 @@
 package ui;
 
+import core.SaveManager;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -9,18 +10,24 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LeaderboardMenu extends VBox {
 
+    private static final String LEADERBOARD_FILE = "leaderboard.txt";
     private static final List<ScoreEntry> scores = new ArrayList<>();
+
+    static {
+        loadScoresFromFile();
+    }
 
     public static class ScoreEntry {
         String name;
-        int score;
+        long score;
 
-        public ScoreEntry(String name, int score) {
+        public ScoreEntry(String name, long score) {
             this.name = name;
             this.score = score;
         }
@@ -28,7 +35,7 @@ public class LeaderboardMenu extends VBox {
 
     private boolean submitted = false;
 
-    public LeaderboardMenu(int currentScore, Runnable onCloseAction) {
+    public LeaderboardMenu(long currentScore, Runnable onCloseAction) {
         setAlignment(Pos.CENTER);
         setSpacing(20);
         setStyle("-fx-background-color: rgba(10, 10, 20, 0.95);");
@@ -61,15 +68,15 @@ public class LeaderboardMenu extends VBox {
                         "-fx-prompt-text-fill: #555577;" +
                         "-fx-alignment: center;"
         );
+        // Pre-fill username with current logged-in user
+        nameField.setText(SaveManager.getCurrentUser());
         nameField.setPromptText("PLAYER NAME");
 
         Button submitButton = createStyledButton("REGISTER SCORE", () -> {
             if (!submitted) {
                 String name = nameField.getText().trim();
                 if (!name.isEmpty()) {
-                    scores.add(new ScoreEntry(name.toUpperCase(), currentScore));
-                    // Sort descending by score
-                    scores.sort((a, b) -> Integer.compare(b.score, a.score));
+                    addScore(name.toUpperCase(), currentScore);
                     submitted = true;
 
                     inputSection.getChildren().clear();
@@ -89,6 +96,47 @@ public class LeaderboardMenu extends VBox {
         Button backButton = createStyledButton("BACK", onCloseAction);
 
         getChildren().addAll(titleLabel, scoreListContainer, submitted ? new VBox() : inputSection, backButton);
+    }
+
+    public static synchronized void addScore(String name, long score) {
+        if (name == null || name.trim().isEmpty()) {
+            name = "GUEST";
+        }
+        scores.add(new ScoreEntry(name.toUpperCase(), score));
+        scores.sort((a, b) -> Long.compare(b.score, a.score));
+        saveScoresToFile();
+    }
+
+    private static void loadScoresFromFile() {
+        scores.clear();
+        File file = new File(LEADERBOARD_FILE);
+        if (!file.exists()) return;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 2) {
+                    String name = parts[0].trim();
+                    long score = Long.parseLong(parts[1].trim());
+                    scores.add(new ScoreEntry(name, score));
+                }
+            }
+            scores.sort((a, b) -> Long.compare(b.score, a.score));
+        } catch (IOException | NumberFormatException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void saveScoresToFile() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(LEADERBOARD_FILE))) {
+            for (ScoreEntry entry : scores) {
+                writer.write(entry.name + "," + entry.score);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void updateScoreListView(VBox container) {

@@ -1,5 +1,6 @@
 package ui;
 
+import core.SaveManager;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -86,6 +87,8 @@ public class LoginMenu extends VBox {
                 statusLabel.setText("PLEASE FILL IN ALL FIELDS");
             } else {
                 statusLabel.setText("");
+                // Bind and load player progress for current user
+                SaveManager.loginUser(username);
                 if (this.onLoginSubmit != null) {
                     this.onLoginSubmit.accept(username, password);
                 }

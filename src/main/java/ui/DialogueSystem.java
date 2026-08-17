@@ -33,6 +33,10 @@ public class DialogueSystem {
         }
     }
 
+    public void startDialogue(String speaker, String text, Image portrait, double durationSeconds) {
+        showMessage(speaker, text, portrait, durationSeconds);
+    }
+
     /**
      * Displays dialogue with a speaker name, text body, portrait image, and duration.
      */
@@ -55,28 +59,28 @@ public class DialogueSystem {
     public void update(double delta) {
         if (!active) return;
 
-        displayTimer += delta;
-
+        // Typewriter Effect
         if (visibleCharCount < fullText.length()) {
             charTimer += delta;
-            if (charTimer >= timePerChar) {
-                charTimer = 0.0;
+            while (charTimer >= timePerChar && visibleCharCount < fullText.length()) {
+                charTimer -= timePerChar;
 
                 char nextChar = fullText.charAt(visibleCharCount);
                 if (nextChar != ' ' && textSound != null) {
                     textSound.play(0.3); // Play at 30% volume
                 }
 
-                visibleCharCount = Math.min(visibleCharCount + 1, fullText.length());
+                visibleCharCount++;
                 currentDisplayText = fullText.substring(0, visibleCharCount);
             }
-        }
-
-        if (displayTimer >= duration) {
-            clear();
+        } else {
+            // Only count down reading duration AFTER typing finishes
+            displayTimer += delta;
+            if (displayTimer >= duration) {
+                clear();
+            }
         }
     }
-
 
     public void render(GraphicsContext gc, double panelWidth, double panelHeight) {
         if (!active) return;

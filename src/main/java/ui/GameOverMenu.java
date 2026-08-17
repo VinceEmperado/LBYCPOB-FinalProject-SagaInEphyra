@@ -1,5 +1,6 @@
 package ui;
 
+import core.SaveManager;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -16,13 +17,13 @@ public class GameOverMenu extends VBox {
     private final Button restartButton;
     private final Button leaderboardButton;
     private final Button menuButton;
-    private final Supplier<Integer> scoreSupplier;
+    private final Supplier<? extends Number> scoreSupplier;
 
     public GameOverMenu(Runnable onRestart, Runnable onMenu) {
         this(onRestart, onMenu, () -> 0);
     }
 
-    public GameOverMenu(Runnable onRestart, Runnable onMenu, Supplier<Integer> scoreSupplier) {
+    public GameOverMenu(Runnable onRestart, Runnable onMenu, Supplier<? extends Number> scoreSupplier) {
         this.scoreSupplier = scoreSupplier;
 
         setAlignment(Pos.CENTER);
@@ -37,7 +38,9 @@ public class GameOverMenu extends VBox {
 
         leaderboardButton = createStyledButton("VIEW LEADERBOARD", () -> {
             if (getParent() instanceof StackPane root) {
-                int currentScore = scoreSupplier != null ? scoreSupplier.get() : 0;
+                long currentScore = scoreSupplier != null && scoreSupplier.get() != null
+                        ? scoreSupplier.get().longValue()
+                        : 0;
 
                 final LeaderboardMenu[] menuHolder = new LeaderboardMenu[1];
                 menuHolder[0] = new LeaderboardMenu(currentScore, () -> {
@@ -53,6 +56,15 @@ public class GameOverMenu extends VBox {
     }
 
     public void show(boolean victory) {
+        long finalScore = scoreSupplier != null && scoreSupplier.get() != null
+                ? scoreSupplier.get().longValue()
+                : 0;
+        String user = SaveManager.getCurrentUser();
+
+        // Save progress for logged-in user and persist high score
+        SaveManager.saveCurrentProgress(finalScore, SaveManager.getCurrentStageIndex());
+        LeaderboardMenu.addScore(user, finalScore);
+
         if (victory) {
             titleLabel.setText("VICTORY");
             titleLabel.setTextFill(Color.web("#00ffcc"));

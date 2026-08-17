@@ -77,6 +77,16 @@ public class StageDirector {
         return currentStageIndex;
     }
 
+    public void setCurrentStageIndex(int currentStageIndex) {
+        this.currentStageIndex = currentStageIndex;
+        if (this.currentStageIndex > 4) {
+            this.allStagesCleared = true;
+        } else {
+            this.allStagesCleared = false;
+            loadStageBoss(this.currentStageIndex);
+        }
+    }
+
     public boolean isAllStagesCleared() {
         return allStagesCleared;
     }

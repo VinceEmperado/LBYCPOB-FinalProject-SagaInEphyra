@@ -14,11 +14,16 @@ import ui.TestersMenu;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+
+import java.util.Optional;
 
 public class GameLauncher extends Application {
 
@@ -71,6 +76,34 @@ public class GameLauncher extends Application {
     }
 
     private void startGame(Stage primaryStage) {
+        boolean loadSavedData = false;
+
+        // Check if there is existing save data for the active user
+        if (SaveManager.hasSave()) {
+            Alert saveAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            saveAlert.setTitle("Saved Progress Found");
+            saveAlert.setHeaderText("A save file was detected for [" + SaveManager.getCurrentUser() + "]");
+            saveAlert.setContentText("Would you like to continue from your saved progress or start a new game?");
+
+            ButtonType btnContinue = new ButtonType("Continue", ButtonBar.ButtonData.OK_DONE);
+            ButtonType btnNewGame = new ButtonType("New Game", ButtonBar.ButtonData.OTHER);
+            ButtonType btnCancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+            saveAlert.getButtonTypes().setAll(btnContinue, btnNewGame, btnCancel);
+
+            Optional<ButtonType> choice = saveAlert.showAndWait();
+            if (choice.isPresent()) {
+                if (choice.get() == btnContinue) {
+                    loadSavedData = true;
+                } else if (choice.get() == btnCancel) {
+                    return; // Cancel start, stay on Main Menu
+                } else if (choice.get() == btnNewGame) {
+                    SaveManager.resetCurrentProgress();
+                    loadSavedData = false;
+                }
+            }
+        }
+
         BulletPool bulletPool = new BulletPool(1000);
         PatternSpawner patternSpawner = new PatternSpawner(bulletPool);
 
@@ -80,17 +113,27 @@ public class GameLauncher extends Application {
         GamePanel gamePanel = new GamePanel(player, enemy, bulletPool);
         loopManager = new GameLoopManager(gamePanel, player, enemy);
 
-        // Apply saved user score if progress was loaded
-        if (SaveManager.getCurrentScore() > 0) {
-            gamePanel.getScoreManager().setScore(SaveManager.getCurrentScore());
+        // Apply saved score and stage index if continuing
+        if (loadSavedData) {
+            long score = SaveManager.getCurrentScore();
+            int stageIndex = SaveManager.getSavedStageIndex();
+
+            gamePanel.getScoreManager().setScore(score);
+            if (gamePanel.getStageDirector() != null) {
+                gamePanel.getStageDirector().setCurrentStageIndex(stageIndex);
+            }
+            System.out.println("Loaded game save | Score: " + score + " | Stage Index: " + stageIndex);
         }
 
-        // Pause Menu Callbacks (Resume, Save, Restart, Quit)
+        // Pause Menu Callbacks
         PauseMenu pauseMenu = new PauseMenu(
-                () -> gamePanel.setPaused(false), // Resume
-                () -> saveGame(gamePanel),        // Save Game
-                () -> restartGame(primaryStage),  // Restart
-                () -> {                            // Quit to Main Menu
+                () -> {
+                    gamePanel.setPaused(false);
+                    gamePanel.requestFocus();
+                },
+                () -> saveGame(gamePanel),
+                () -> restartGame(primaryStage),
+                () -> {
                     if (loopManager != null) loopManager.stop();
                     showMainMenu(primaryStage);
                 }
@@ -98,7 +141,7 @@ public class GameLauncher extends Application {
         pauseMenu.setVisible(false);
         gamePanel.setPauseMenu(pauseMenu);
 
-        // GameOverMenu Callbacks (Connected live score supplier)
+        // GameOverMenu Callbacks
         GameOverMenu gameOverMenu = new GameOverMenu(
                 () -> restartGame(primaryStage),
                 () -> {
@@ -141,12 +184,26 @@ public class GameLauncher extends Application {
         Pane testersOverlay = new Pane(testersMenu);
         testersOverlay.setPickOnBounds(false);
 
-        // Stack layers: Canvas -> Testers Menu -> Pause Menu -> Game Over Menu
         StackPane root = new StackPane(gamePanel, testersOverlay, pauseMenu, gameOverMenu);
         Scene scene = new Scene(root, 1600, 900);
 
-        scene.addEventFilter(KeyEvent.KEY_PRESSED, gamePanel::keyPressed);
-        scene.addEventFilter(KeyEvent.KEY_RELEASED, gamePanel::keyReleased);
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            if (e.getCode() == KeyCode.ESCAPE || e.getCode() == KeyCode.P) {
+                gamePanel.togglePause();
+                if (!gamePanel.isPaused()) {
+                    gamePanel.requestFocus();
+                }
+                e.consume();
+            } else if (!gamePanel.isPaused()) {
+                gamePanel.keyPressed(e);
+            }
+        });
+
+        scene.addEventFilter(KeyEvent.KEY_RELEASED, e -> {
+            if (!gamePanel.isPaused()) {
+                gamePanel.keyReleased(e);
+            }
+        });
 
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.F1) {
