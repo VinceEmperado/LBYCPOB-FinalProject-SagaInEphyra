@@ -26,15 +26,23 @@ public class TestersMenu extends ScrollPane {
     private final PlayerCharacter player;
     private final PatternSpawner patternSpawner;
     private final Consumer<EnemyController> enemySwapper;
+    private DialogueSystem dialogueSystem;
     private boolean godMode = false;
 
     public TestersMenu(BulletPool bulletPool, double screenWidth, double screenHeight,
                        PlayerCharacter player, PatternSpawner patternSpawner,
                        Consumer<EnemyController> enemySwapper) {
+        this(bulletPool, screenWidth, screenHeight, player, patternSpawner, enemySwapper, null);
+    }
+
+    public TestersMenu(BulletPool bulletPool, double screenWidth, double screenHeight,
+                       PlayerCharacter player, PatternSpawner patternSpawner,
+                       Consumer<EnemyController> enemySwapper, DialogueSystem dialogueSystem) {
         this.bulletPool = bulletPool;
         this.player = player;
         this.patternSpawner = patternSpawner;
         this.enemySwapper = enemySwapper;
+        this.dialogueSystem = dialogueSystem;
 
         VBox container = new VBox(8);
         container.setPadding(new Insets(15));
@@ -76,6 +84,12 @@ public class TestersMenu extends ScrollPane {
             if (this.enemySwapper != null) {
                 String selected = bossSelect.getValue();
                 EnemyController newEnemy = createEnemyFromSelection(selected, screenWidth);
+                if (newEnemy instanceof Kanaloa kanaloa) {
+                    kanaloa.setPlayer(this.player);
+                    if (this.dialogueSystem != null) {
+                        kanaloa.setDialogueSystem(this.dialogueSystem);
+                    }
+                }
                 this.enemySwapper.accept(newEnemy);
             }
         });
@@ -198,9 +212,13 @@ public class TestersMenu extends ScrollPane {
         );
     }
 
+    public void setDialogueSystem(DialogueSystem dialogueSystem) {
+        this.dialogueSystem = dialogueSystem;
+    }
+
     private EnemyController createEnemyFromSelection(String selection, double screenWidth) {
         return switch (selection) {
-            case "Stage 1 Boss: Kanaloa" -> new Kanaloa(screenWidth / 2.0 - 80, 120, patternSpawner, player);
+            case "Stage 1 Boss: Kanaloa" -> new Kanaloa(screenWidth / 2.0 - 80, 120, 1100.0, patternSpawner, player, dialogueSystem);
             default -> new Clawdia(screenWidth / 2.0 - 60, 150, patternSpawner, player);
         };
     }

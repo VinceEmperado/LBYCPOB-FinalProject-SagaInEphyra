@@ -9,6 +9,7 @@ import ui.GameOverMenu;
 import ui.LeaderboardMenu;
 import ui.LoginMenu;
 import ui.MainMenu;
+import ui.PauseMenu;
 import ui.TestersMenu;
 
 import javafx.application.Application;
@@ -35,7 +36,6 @@ public class GameLauncher extends Application {
     }
 
     private void showMainMenu(Stage primaryStage) {
-        // Matched callbacks with MainMenu(onLogin, onStart, onLeaderboard, onExit)
         MainMenu mainMenu = new MainMenu(
                 () -> showLoginMenu(primaryStage),
                 () -> startGame(primaryStage),
@@ -50,7 +50,6 @@ public class GameLauncher extends Application {
     private void showLoginMenu(Stage primaryStage) {
         LoginMenu loginMenu = new LoginMenu(
                 (username, password) -> {
-                    // Handle login submission logic (e.g., authenticate user)
                     System.out.println("User logged in: " + username);
                     showMainMenu(primaryStage);
                 },
@@ -62,9 +61,8 @@ public class GameLauncher extends Application {
     }
 
     private void showLeaderboardMenu(Stage primaryStage) {
-        // Opens leaderboard from the main menu with default 0 current score view
         LeaderboardMenu leaderboardMenu = new LeaderboardMenu(
-                0,
+                SaveManager.getCurrentScore(),
                 () -> showMainMenu(primaryStage)
         );
 
@@ -82,17 +80,36 @@ public class GameLauncher extends Application {
         GamePanel gamePanel = new GamePanel(player, enemy, bulletPool);
         loopManager = new GameLoopManager(gamePanel, player, enemy);
 
-        // GameOverMenu returns to main menu on exit
+        // Apply saved user score if progress was loaded
+        if (SaveManager.getCurrentScore() > 0) {
+            gamePanel.getScoreManager().setScore(SaveManager.getCurrentScore());
+        }
+
+        // Pause Menu Callbacks (Resume, Save, Restart, Quit)
+        PauseMenu pauseMenu = new PauseMenu(
+                () -> gamePanel.setPaused(false), // Resume
+                () -> saveGame(gamePanel),        // Save Game
+                () -> restartGame(primaryStage),  // Restart
+                () -> {                            // Quit to Main Menu
+                    if (loopManager != null) loopManager.stop();
+                    showMainMenu(primaryStage);
+                }
+        );
+        pauseMenu.setVisible(false);
+        gamePanel.setPauseMenu(pauseMenu);
+
+        // GameOverMenu Callbacks (Connected live score supplier)
         GameOverMenu gameOverMenu = new GameOverMenu(
                 () -> restartGame(primaryStage),
                 () -> {
                     if (loopManager != null) loopManager.stop();
                     showMainMenu(primaryStage);
-                }
+                },
+                () -> gamePanel.getScoreManager().getScore()
         );
         gamePanel.setGameOverMenu(gameOverMenu);
 
-        Scene scene = createGameScene(gamePanel, bulletPool, player, patternSpawner, gameOverMenu);
+        Scene scene = createGameScene(gamePanel, bulletPool, player, patternSpawner, pauseMenu, gameOverMenu);
 
         primaryStage.setScene(scene);
         primaryStage.centerOnScreen();
@@ -102,7 +119,7 @@ public class GameLauncher extends Application {
     }
 
     private Scene createGameScene(GamePanel gamePanel, BulletPool bulletPool, PlayerCharacter player,
-                                  PatternSpawner patternSpawner, GameOverMenu gameOverMenu) {
+                                  PatternSpawner patternSpawner, PauseMenu pauseMenu, GameOverMenu gameOverMenu) {
 
         TestersMenu testersMenu = new TestersMenu(
                 bulletPool,
@@ -113,19 +130,19 @@ public class GameLauncher extends Application {
                 newEnemy -> {
                     gamePanel.setEnemy(newEnemy);
                     loopManager.setEnemy(newEnemy);
-                }
+                },
+                gamePanel.getDialogueSystem()
         );
 
         testersMenu.setLayoutX(10);
         testersMenu.setLayoutY(10);
         testersMenu.setPrefHeight(400);
 
-        // Wrap TestersMenu in a non-blocking Pane to maintain absolute layout positioning
         Pane testersOverlay = new Pane(testersMenu);
         testersOverlay.setPickOnBounds(false);
 
-        // Stack layers: Canvas -> Testers Menu -> Game Over Menu Overlay
-        StackPane root = new StackPane(gamePanel, testersOverlay, gameOverMenu);
+        // Stack layers: Canvas -> Testers Menu -> Pause Menu -> Game Over Menu
+        StackPane root = new StackPane(gamePanel, testersOverlay, pauseMenu, gameOverMenu);
         Scene scene = new Scene(root, 1600, 900);
 
         scene.addEventFilter(KeyEvent.KEY_PRESSED, gamePanel::keyPressed);
@@ -138,6 +155,15 @@ public class GameLauncher extends Application {
         });
 
         return scene;
+    }
+
+    private void saveGame(GamePanel gamePanel) {
+        long score = gamePanel.getScoreManager().getScore();
+        int stageIndex = gamePanel.getStageDirector().getCurrentStageIndex();
+
+        SaveManager.saveCurrentProgress(score, stageIndex);
+        System.out.println("Saved progress for user [" + SaveManager.getCurrentUser() +
+                "] | Stage Index: " + stageIndex + " | Score: " + score);
     }
 
     private void restartGame(Stage stage) {

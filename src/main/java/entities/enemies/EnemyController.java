@@ -3,17 +3,24 @@ package entities.enemies;
 import combat.PatternSpawner;
 import entities.DamageOrb;
 import entities.PlayerCharacter;
+import ui.DialogueSystem;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public abstract class EnemyController {
     protected double x, y;
     protected int width = 120, height = 120;
     protected Image enemySprite;
     protected PatternSpawner patternSpawner;
+    protected PlayerCharacter player;
+    protected DialogueSystem dialogueSystem;
 
     protected int currentPhase = 1;
     protected double survivalTimer = 0.0;
@@ -27,7 +34,7 @@ public abstract class EnemyController {
     protected double dialogueDuration = 3.0;
     protected String currentDialogueText = "";
 
-    protected java.util.List<DamageOrb> activeOrbs = new java.util.ArrayList<>();
+    protected List<DamageOrb> activeOrbs = new ArrayList<>();
     protected double orbSpawnTimer = 0.0;
     protected double orbSpawnInterval = 1.5;
 
@@ -53,6 +60,18 @@ public abstract class EnemyController {
         }
     }
 
+    public void setPlayer(PlayerCharacter player) {
+        this.player = player;
+    }
+
+    public void setDialogueSystem(DialogueSystem dialogueSystem) {
+        this.dialogueSystem = dialogueSystem;
+    }
+
+    public DialogueSystem getDialogueSystem() {
+        return dialogueSystem;
+    }
+
     public void update(double delta, double panelWidth, double panelHeight) {
         if (isDead()) return;
 
@@ -69,9 +88,8 @@ public abstract class EnemyController {
         // Phase 1 timer OR health threshold triggers phase transition
         if (currentPhase == 1) {
             survivalTimer += delta;
-            if (survivalTimer >= phaseOneDuration || currentHealth <= 250.0) {
-                isTransitioning = true;
-                currentDialogueText = getEnragedDialogue();
+            if (survivalTimer >= phaseOneDuration || currentHealth <= (maxHealth / 2.0)) {
+                triggerPhaseTransition(getEnragedDialogue());
             }
         }
 
@@ -79,8 +97,8 @@ public abstract class EnemyController {
             orbSpawnTimer += delta;
 
             if (orbSpawnTimer >= orbSpawnInterval) {
-                double dropX = new java.util.Random().nextInt(Math.max(1, (int) panelWidth - 30));
-                double dropY = new java.util.Random().nextInt(Math.max(1, (int) panelHeight - 30));
+                double dropX = new Random().nextInt(Math.max(1, (int) panelWidth - 30));
+                double dropY = new Random().nextInt(Math.max(1, (int) panelHeight - 30));
 
                 activeOrbs.add(new DamageOrb(dropX, dropY));
                 orbSpawnTimer = 0;
@@ -88,6 +106,15 @@ public abstract class EnemyController {
         }
 
         performAttackPattern(delta, panelWidth, panelHeight);
+    }
+
+    protected void triggerPhaseTransition(String dialogueText) {
+        isTransitioning = true;
+        currentDialogueText = dialogueText;
+
+        if (dialogueSystem != null) {
+            dialogueSystem.showMessage("Enemy", dialogueText, null, dialogueDuration);
+        }
     }
 
     public void checkOrbCollisions(PlayerCharacter player) {
@@ -103,7 +130,6 @@ public abstract class EnemyController {
             if (distance < (player.getWidth() / 2.0 + orb.getRadius())) {
                 takeDamage(orb.getDamageAmount());
                 activeOrbs.remove(i);
-                System.out.println("Picked up orb! Dealt " + orb.getDamageAmount() + " damage!");
             }
         }
     }
@@ -140,7 +166,7 @@ public abstract class EnemyController {
             gc.fillRect(x, y - 15, Math.max(0, healthWidth), 8);
         }
 
-        if (isTransitioning) {
+        if (isTransitioning && dialogueSystem == null) {
             gc.setFill(Color.WHITE);
             gc.setFont(Font.font("Arial", FontWeight.BOLD, 14));
             gc.fillText(currentDialogueText, x - 30, y - 20);
@@ -161,14 +187,8 @@ public abstract class EnemyController {
         return currentHealth <= 0;
     }
 
-    public int getCurrentPhase() {
-        return currentPhase;
-    }
-
-    public double getHealthPercentage() {
-        return maxHealth > 0 ? (currentHealth / maxHealth) : 0.0;
-    }
-
+    public int getCurrentPhase() { return currentPhase; }
+    public double getHealthPercentage() { return maxHealth > 0 ? (currentHealth / maxHealth) : 0.0; }
     public double getX() { return x; }
     public double getY() { return y; }
     public int getWidth() { return width; }

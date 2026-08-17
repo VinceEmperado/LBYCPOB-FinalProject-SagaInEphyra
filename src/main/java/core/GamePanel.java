@@ -1,6 +1,7 @@
 package core;
 
 import combat.PatternSpawner;
+import entities.boss.Kanaloa;
 import entities.enemies.EnemyController;
 import entities.PlayerCharacter;
 import pools.BulletPool;
@@ -8,6 +9,7 @@ import pools.ItemPool;
 import ui.DialogueSystem;
 import ui.GameHudManager;
 import ui.GameOverMenu;
+import ui.PauseMenu;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -19,13 +21,18 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 public class GamePanel extends Canvas {
+
     private final PlayerCharacter player;
     private EnemyController enemy;
     private final BulletPool bulletPool;
     private final BulletPool playerBulletPool;
     private final ItemPool itemPool;
     private final StageDirector stageDirector;
+
     private GameOverMenu gameOverMenu;
+    private PauseMenu pauseMenu;
+    private boolean isPaused = false;
+
     private final ScoreManager scoreManager = new ScoreManager();
     private final GameHudManager hudManager = new GameHudManager(scoreManager);
     private final DialogueSystem dialogueSystem = new DialogueSystem();
@@ -37,7 +44,6 @@ public class GamePanel extends Canvas {
     }
 
     public GamePanel(PlayerCharacter player, EnemyController enemy, BulletPool bulletPool, BulletPool playerBulletPool) {
-        // Pass bulletPool into the PatternSpawner constructor
         this(player, enemy, bulletPool, playerBulletPool, new PatternSpawner(bulletPool));
     }
 
@@ -48,20 +54,19 @@ public class GamePanel extends Canvas {
         this.playerBulletPool = playerBulletPool;
         this.itemPool = new ItemPool(20);
 
-        // Fallback to a new spawner with bulletPool if null is passed
         PatternSpawner spawnerToUse = (patternSpawner != null) ? patternSpawner : new PatternSpawner(bulletPool);
 
         this.stageDirector = new StageDirector(
                 spawnerToUse,
                 player,
                 this.itemPool,
-                newBoss -> this.enemy = newBoss
+                newBoss -> setEnemy(newBoss) // Connect new bosses to DialogueSystem on spawn
         );
 
         if (this.stageDirector.getCurrentEnemy() != null) {
-            this.enemy = this.stageDirector.getCurrentEnemy();
-        } else {
-            this.enemy = enemy;
+            setEnemy(this.stageDirector.getCurrentEnemy());
+        } else if (enemy != null) {
+            setEnemy(enemy);
         }
 
         setFocusTraversable(true);
@@ -70,11 +75,67 @@ public class GamePanel extends Canvas {
         setOnKeyReleased(this::keyReleased);
     }
 
+    /**
+     * Builds the root container layering Canvas, Pause Menu, and GameOver Menu.
+     */
     public StackPane createContainer(GameOverMenu menu) {
+        return createContainer(menu, new PauseMenu(
+                () -> setPaused(false), // Resume callback
+                () -> restartGame(),    // Restart callback
+                () -> quitGame()        // Quit callback
+        ));
+    }
+
+    public StackPane createContainer(GameOverMenu menu, PauseMenu pauseMenu) {
         this.gameOverMenu = menu;
+        this.pauseMenu = pauseMenu;
+
+        if (this.pauseMenu != null) {
+            this.pauseMenu.setVisible(false);
+            this.pauseMenu.setOnResume(() -> setPaused(false));
+        }
+
         StackPane root = new StackPane();
-        root.getChildren().addAll(this, menu);
+        root.getChildren().add(this);
+
+        if (this.pauseMenu != null) {
+            root.getChildren().add(this.pauseMenu);
+        }
+        if (this.gameOverMenu != null) {
+            root.getChildren().add(this.gameOverMenu);
+        }
+
         return root;
+    }
+
+    public void togglePause() {
+        setPaused(!isPaused);
+    }
+
+    public void setPaused(boolean paused) {
+        this.isPaused = paused;
+        resetInputKeys();
+
+        if (pauseMenu != null) {
+            pauseMenu.setVisible(isPaused);
+            if (isPaused) {
+                pauseMenu.toFront();
+            }
+        }
+    }
+
+    public boolean isPaused() {
+        return isPaused;
+    }
+
+    private void restartGame() {
+        setPaused(false);
+        // Add stage/player reset logic here if needed
+    }
+
+    private void quitGame() {
+        setPaused(false);
+        // Add scene transition/quit logic here
     }
 
     public void showGameOver(boolean victory) {
@@ -100,6 +161,14 @@ public class GamePanel extends Canvas {
     }
 
     public void update(double delta) {
+        // Freeze game logic while paused
+        if (isPaused) return;
+
+        // Update dialogue typewriter/display timer
+        if (dialogueSystem != null) {
+            dialogueSystem.update(delta);
+        }
+
         if (stageDirector != null) {
             if (stageDirector.isAllStagesCleared()) {
                 showGameOver(true);
@@ -107,7 +176,12 @@ public class GamePanel extends Canvas {
             }
 
             stageDirector.update();
-            this.enemy = stageDirector.getCurrentEnemy();
+
+            // Sync active enemy and ensure dialogue system reference persists across stages
+            EnemyController currentStageEnemy = stageDirector.getCurrentEnemy();
+            if (currentStageEnemy != null && currentStageEnemy != this.enemy) {
+                setEnemy(currentStageEnemy);
+            }
         }
 
         if (itemPool != null && player != null) {
@@ -129,19 +203,20 @@ public class GamePanel extends Canvas {
     public void render() {
         GraphicsContext gc = getGraphicsContext2D();
 
-        // Background
+        // 1. Background
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, getWidth(), getHeight());
 
-        // Item Drops
+        // 2. Item Drops
         if (itemPool != null) {
             itemPool.render(gc);
         }
 
-        // Game Entities & Bullets
+        // 3. Game Entities & Bullets
         if (enemy != null && !enemy.isDead()) {
             enemy.render(gc);
         }
+
         if (player != null) {
             player.render(gc);
         }
@@ -154,22 +229,38 @@ public class GamePanel extends Canvas {
             playerBulletPool.render(gc);
         }
 
+        // 4. Kanaloa Abyssal Lighting Fog-of-War (Renders over world entities)
+        if (enemy instanceof Kanaloa kanaloa && !kanaloa.isDead()) {
+            kanaloa.renderAbyssalLighting(gc, getWidth(), getHeight());
+        }
+
+        // 5. HUD
         hudManager.render(gc, getWidth(), getHeight(), player, enemy);
 
-        // Stage HUD Title Header
+        // Stage Title Header
         if (stageDirector != null) {
             gc.setFill(Color.WHITE);
             gc.setFont(Font.font("Consolas", FontWeight.BOLD, 18));
             gc.fillText(stageDirector.getCurrentStageTitle(), 20, 30);
         }
 
-        if (dialogueSystem.isActive()) {
+        // 6. Dialogue System Overlay
+        if (dialogueSystem != null && dialogueSystem.isActive()) {
             dialogueSystem.render(gc, getWidth(), getHeight());
         }
     }
 
     public void keyPressed(KeyEvent e) {
         KeyCode code = e.getCode();
+
+        // Pause Toggle
+        if (code == KeyCode.ESCAPE || code == KeyCode.P) {
+            togglePause();
+            return;
+        }
+
+        if (isPaused) return;
+
         if (code == KeyCode.W || code == KeyCode.UP) up = true;
         if (code == KeyCode.S || code == KeyCode.DOWN) down = true;
         if (code == KeyCode.A || code == KeyCode.LEFT) left = true;
@@ -201,10 +292,17 @@ public class GamePanel extends Canvas {
     public GameOverMenu getGameOverMenu() { return gameOverMenu; }
     public void setGameOverMenu(GameOverMenu gameOverMenu) { this.gameOverMenu = gameOverMenu; }
 
+    public PauseMenu getPauseMenu() { return pauseMenu; }
+    public void setPauseMenu(PauseMenu pauseMenu) { this.pauseMenu = pauseMenu; }
+
     @SuppressWarnings("unused")
     public EnemyController getEnemy() { return enemy; }
-
     public PlayerCharacter getPlayer() { return player; }
 
-    public void setEnemy(EnemyController enemy) { this.enemy = enemy; }
+    public void setEnemy(EnemyController enemy) {
+        this.enemy = enemy;
+        if (this.enemy != null) {
+            this.enemy.setDialogueSystem(this.dialogueSystem);
+        }
+    }
 }
