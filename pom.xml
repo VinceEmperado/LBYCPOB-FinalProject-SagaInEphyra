@@ -41,6 +41,18 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>core.GameLauncher</mainClass>
+                    <options>
+                        <option>--add-exports</option>
+                        <option>javafx.base/com.sun.javafx=ALL-UNNAMED</option>
+                        <option>--add-exports</option>
+                        <option>javafx.graphics/com.sun.glass.utils=ALL-UNNAMED</option>
+                        <option>--add-exports</option>
+                        <option>javafx.graphics/com.sun.javafx.util=ALL-UNNAMED</option>
+                        <option>--add-exports</option>
+                        <option>javafx.media/com.sun.media.jfxmedia=ALL-UNNAMED</option>
+                        <option>--add-exports</option>
+                        <option>javafx.media/com.sun.media.jfxmediaimpl=ALL-UNNAMED</option>
+                    </options>
                 </configuration>
             </plugin>
         </plugins>
