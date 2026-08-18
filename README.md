@@ -39,11 +39,11 @@ NOTE: This image is from the 7th Touhou Project game by ZUN called Touhou 7: Per
 
 # User Stories
 
-- As a person who struggles to focus, I want to play the bullet hell stages so that I can practice maintaining my attention span
-- As a player, I want the game to gradually become
-- As a player, I want clear visual feedbacks whenever I get hit so that I can immediately recognize my mistakes and improve for my next run
-- As a player, I want to see my previous scores so I can monitor my improvement
-- As a player, I want bosses with unique attack patterns so that I stay engaged while training my focus
+- As a person who struggles to focus, I want to play the bullet hell stages so that I can practice maintaining my attention span.
+- As a player, I want the game to gradually become more difficult.
+- As a player, I want clear visual feedback whenever I get hit so that I can immediately recognize my mistakes and improve for my next run.
+- As a player, I want to see my previous scores so I can monitor my improvement.
+- As a player, I want bosses with unique attack patterns so that I stay engaged while training my focus.
 
 # Core Features
 - Leaderboard system using local scores
