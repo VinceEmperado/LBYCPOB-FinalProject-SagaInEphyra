@@ -29,9 +29,9 @@ public class PlayerCharacter {
 
     // Shooting controls, damage & cooldowns
     private double shootCooldown = 0.0;
-    private final double shootInterval = 0.10;
+    private final double shootInterval = 0.3;
     private final double playerBulletSpeed = 600.0;
-    private double bulletDamage = 15.0;
+    private double bulletDamage = 1.0;
 
     // Graze visual
     private double grazeFlashTimer = 0.0;
