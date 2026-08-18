@@ -11,6 +11,7 @@ public class GameLoopManager {
     private final PlayerCharacter playerCharacter;
     private EnemyController enemy;
     private final AnimationTimer timer;
+    private static final double GRAZE_BUFFER = 20.0;
 
     public GameLoopManager(GamePanel gamePanel, PlayerCharacter playerCharacter, EnemyController enemy) {
         this.gamePanel = gamePanel;
@@ -122,6 +123,34 @@ public class GameLoopManager {
                 bullet.setActive(false);
 
                 // Reset multiplier when player gets hit
+                if (gamePanel.getScoreManager() != null) {
+                    gamePanel.getScoreManager().resetMultiplier();
+                }
+            }
+        }
+    }
+
+    private void checkGrazeEvents() {
+        if (playerCharacter == null || playerCharacter.isDead() || gamePanel.getBulletPool() == null) {
+            return;
+        }
+
+        double px = playerCharacter.getX() + playerCharacter.getWidth() / 2;
+        double py = playerCharacter.getY() + playerCharacter.getHeight() / 2;
+
+        for (Bullet bullet : gamePanel.getBulletPool().getActiveBullets()) {
+            if (!bullet.isActive() || bullet.isGrazed()) {
+                continue;
+            }
+
+            double dx = bullet.getX() - px;
+            double dy = bullet.getY() - py;
+            double distance = Math.hypot(dx, dy);
+
+            double grazeRadius = bullet.getRadius() + GRAZE_BUFFER;
+
+            if (distance <= grazeRadius) {
+                bullet.setGrazed(true);
                 if (gamePanel.getScoreManager() != null) {
                     gamePanel.getScoreManager().resetMultiplier();
                 }
