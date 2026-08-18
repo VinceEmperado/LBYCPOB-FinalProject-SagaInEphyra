@@ -85,7 +85,7 @@ public class Kanaloa extends EnemyController {
         healthSystem.takeDamage(amount);
         this.currentHealth = healthSystem.getCurrentHealth();
 
-        AudioManager.getInstance().playSFX("/audio/sfx/boss_hit.wav");
+        AudioManager.getInstance().playSFX("/audio/sfx/boss_hit.mp3");
 
         if (isDead() && !hasSpokenDefeat) {
             triggerDefeatDialogue();

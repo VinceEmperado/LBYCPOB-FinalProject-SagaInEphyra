@@ -67,7 +67,7 @@ public class Thalasaa extends EnemyController {
 
     public void takeDamage(double amount) {
         healthSystem.takeDamage(amount);
-        AudioManager.getInstance().playSFX("/audio/sfx/boss_hit.wav");
+        AudioManager.getInstance().playSFX("/audio/sfx/boss_hit.mp3");
         checkPhaseTransition();
     }
 

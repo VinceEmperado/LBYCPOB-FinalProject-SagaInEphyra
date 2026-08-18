@@ -51,7 +51,7 @@ public class Clawdia extends EnemyController {
     }
 
     public Clawdia(double startX, double startY, double maxHealth, PatternSpawner patternSpawner, PlayerCharacter player, DialogueSystem dialogueSystem) {
-        super(startX, startY, "/sprites/enemy/clawdia.png", patternSpawner);
+        super(startX, startY, "/sprites/enemy/Clawdia.png", "/sprites/enemy/ClawdiaAttack.png", patternSpawner);
         this.player = player;
         this.dialogueSystem = dialogueSystem;
 
@@ -85,7 +85,7 @@ public class Clawdia extends EnemyController {
         healthSystem.takeDamage(amount);
         this.currentHealth = healthSystem.getCurrentHealth();
 
-        AudioManager.getInstance().playSFX("/audio/sfx/boss_hit.wav");
+        AudioManager.getInstance().playSFX("/audio/sfx/boss_hit.mp3");
 
         if (isDead() && !hasSpokenDefeat) {
             triggerDefeatDialogue();

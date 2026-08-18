@@ -41,7 +41,7 @@ public class Finana extends EnemyController {
     }
 
     public Finana(double startX, double startY, double maxHealth, PatternSpawner patternSpawner, PlayerCharacter player, DialogueSystem dialogueSystem) {
-        super(startX, startY, "/sprites/enemy/finana.png", patternSpawner);
+        super(startX, startY, "/sprites/enemy/Finana.png","/sprites/enemy/FinanaAttack.png", patternSpawner);
         this.player = player;
         this.dialogueSystem = dialogueSystem;
         this.healthSystem = new HealthSystem(maxHealth);
@@ -69,7 +69,7 @@ public class Finana extends EnemyController {
 
     public void takeDamage(double amount) {
         healthSystem.takeDamage(amount);
-        AudioManager.getInstance().playSFX("/audio/sfx/boss_hit.wav");
+        AudioManager.getInstance().playSFX("/audio/sfx/boss_hit.mp3");
         checkPhaseTransition();
     }
 
