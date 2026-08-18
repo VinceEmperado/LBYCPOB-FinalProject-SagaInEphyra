@@ -1,6 +1,7 @@
 package entities;
 
 import combat.HealthSystem;
+import core.AudioManager;
 import pools.BulletPool;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -15,6 +16,9 @@ public class PlayerCharacter {
     private final int height = 40;
     private Image playerSprite;
     private Image bulletSprite;
+
+    // Hitbox configuration (Bullet hell / Touhou style small centered hitbox)
+    private final double hitRadius = 5.0;
 
     // Health & Respawn System
     private final HealthSystem healthSystem;
@@ -98,6 +102,9 @@ public class PlayerCharacter {
 
         healthSystem.takeDamage(amount);
 
+        // Player hurt SFX
+        AudioManager.getInstance().playSFX("/audio/sfx/player_hit.mp3");
+
         if (healthSystem.isDead()) {
             lives--;
             if (lives > 0) {
@@ -168,7 +175,20 @@ public class PlayerCharacter {
             gc.setFill(Color.GREEN);
             gc.fillRect((int) x, (int) y, width, height);
         }
+
+        // Draw center hitbox dot when focusing/slowing down
+        if (speed == 180) {
+            gc.setFill(Color.RED);
+            gc.fillOval(getHitCenterX() - hitRadius, getHitCenterY() - hitRadius, hitRadius * 2, hitRadius * 2);
+            gc.setFill(Color.WHITE);
+            gc.fillOval(getHitCenterX() - (hitRadius / 2.0), getHitCenterY() - (hitRadius / 2.0), hitRadius, hitRadius);
+        }
     }
+
+    // Hitbox getters for circular collision checking
+    public double getHitCenterX() { return x + (width / 2.0); }
+    public double getHitCenterY() { return y + (height / 2.0); }
+    public double getHitRadius() { return hitRadius; }
 
     public int getLives() { return lives; }
     public double getX() { return x; }

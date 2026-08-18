@@ -117,8 +117,7 @@ public class GameLoopManager {
         for (Bullet bullet : gamePanel.getBulletPool().getActiveBullets()) {
             if (!bullet.isActive()) continue;
 
-            if (isColliding(bullet, playerCharacter.getX(), playerCharacter.getY(),
-                    playerCharacter.getWidth(), playerCharacter.getHeight())) {
+            if (isCollidingCircle(bullet, playerCharacter.getHitCenterX(), playerCharacter.getHitCenterY(), playerCharacter.getHitRadius())) {
                 playerCharacter.takeDamage(bullet.getDamagePacket().getAmount());
                 bullet.setActive(false);
 
@@ -130,6 +129,7 @@ public class GameLoopManager {
         }
     }
 
+    // Mathematical collision for Circle-to-Rectangle (Used for shooting bosses)
     private boolean isColliding(Bullet bullet, double rx, double ry, double rw, double rh) {
         double closestX = Math.clamp(bullet.getX(), rx, rx + rw);
         double closestY = Math.clamp(bullet.getY(), ry, ry + rh);
@@ -138,5 +138,14 @@ public class GameLoopManager {
         double distY = bullet.getY() - closestY;
 
         return (distX * distX + distY * distY) < (bullet.getRadius() * bullet.getRadius());
+    }
+
+    private boolean isCollidingCircle(Bullet bullet, double cx, double cy, double radius) {
+        double dx = bullet.getX() - cx;
+        double dy = bullet.getY() - cy;
+        double distanceSquared = (dx * dx) + (dy * dy);
+
+        double radiusSum = bullet.getRadius() + radius;
+        return distanceSquared < (radiusSum * radiusSum);
     }
 }
