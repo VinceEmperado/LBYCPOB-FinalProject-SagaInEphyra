@@ -48,3 +48,5 @@ NOTE: This image is from the 7th Touhou Project game by ZUN called Touhou 7: Per
 # Core Features
 - Leaderboard system using local scores
 - Account system for saving scores for multiple users
+- Combat System with different bosses, all of which have different attack patterns
+- A very, very difficult time.
