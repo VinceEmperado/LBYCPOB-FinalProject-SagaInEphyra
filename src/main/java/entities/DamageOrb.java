@@ -14,7 +14,8 @@ public class DamageOrb {
         this.x = x;
         this.y = y;
 
-        this.damageAmount = random.nextInt(31) + 30;
+        // flat damage between 15 and 45
+        this.damageAmount = random.nextInt(31) + 15;
     }
 
     public void render(GraphicsContext gc) {
