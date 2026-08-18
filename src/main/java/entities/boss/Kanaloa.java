@@ -51,7 +51,7 @@ public class Kanaloa extends EnemyController {
     }
 
     public Kanaloa(double startX, double startY, double maxHealth, PatternSpawner patternSpawner, PlayerCharacter player, DialogueSystem dialogueSystem) {
-        super(startX, startY, "/sprites/boss/kanaloa.png", patternSpawner);
+        super(startX, startY, "/sprites/boss/Kanaloa.png", "/sprites/boss/KanaloaAttack.png", patternSpawner);
         this.player = player;
         this.dialogueSystem = dialogueSystem;
 

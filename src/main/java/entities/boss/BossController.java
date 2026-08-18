@@ -17,9 +17,10 @@ public abstract class BossController extends EnemyController {
 
     protected double phaseTwoDuration = 15.0;
 
-    public BossController(double startX, double startY, String imagePath, double maxHealth,
+    // UPDATED: Now takes both normal and attack image paths
+    public BossController(double startX, double startY, String normalImagePath, String attackImagePath, double maxHealth,
                           PatternSpawner patternSpawner, PlayerCharacter player, DialogueSystem dialogueSystem) {
-        super(startX, startY, imagePath, patternSpawner);
+        super(startX, startY, normalImagePath, attackImagePath, patternSpawner);
 
         this.player = player;
         this.dialogueSystem = dialogueSystem;
@@ -61,6 +62,7 @@ public abstract class BossController extends EnemyController {
             }
         }
 
+        // Note: EnemyController's state machine handles the ATTACKING -> STANDING -> SHAKING -> TELEPORTING cycles automatically!
         performAttackPattern(delta, panelWidth, panelHeight);
     }
 

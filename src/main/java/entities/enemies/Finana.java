@@ -41,7 +41,7 @@ public class Finana extends EnemyController {
     }
 
     public Finana(double startX, double startY, double maxHealth, PatternSpawner patternSpawner, PlayerCharacter player, DialogueSystem dialogueSystem) {
-        super(startX, startY, "/sprites/enemies/finana.png", patternSpawner);
+        super(startX, startY, "/sprites/enemy/Finana.png", "/sprites/enemy/FinanaAttack.png", patternSpawner);
         this.player = player;
         this.dialogueSystem = dialogueSystem;
         this.healthSystem = new HealthSystem(maxHealth);

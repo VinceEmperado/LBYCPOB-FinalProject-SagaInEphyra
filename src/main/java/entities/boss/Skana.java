@@ -41,7 +41,7 @@ public class Skana extends EnemyController {
     }
 
     public Skana(double startX, double startY, double maxHealth, PatternSpawner patternSpawner, PlayerCharacter player, DialogueSystem dialogueSystem) {
-        super(startX, startY, "/sprites/boss/skana.png", patternSpawner);
+        super(startX, startY, "/sprites/boss/Skana.png", "/sprites/boss/SkanaAttack.png", patternSpawner);
 
         setPlayer(player);
         setDialogueSystem(dialogueSystem);

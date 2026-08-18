@@ -39,7 +39,7 @@ public class Thalasaa extends EnemyController {
     }
 
     public Thalasaa(double startX, double startY, double maxHealth, PatternSpawner patternSpawner, PlayerCharacter player, DialogueSystem dialogueSystem) {
-        super(startX, startY, "/sprites/boss/thalasaa.png", patternSpawner);
+        super(startX, startY, "/sprites/boss/Thalasaa.png", "/sprites/boss/ThalasaaAttack.png", patternSpawner);
         this.player = player;
         this.dialogueSystem = dialogueSystem;
         this.healthSystem = new HealthSystem(maxHealth);
