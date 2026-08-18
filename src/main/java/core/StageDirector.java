@@ -56,23 +56,23 @@ public class StageDirector {
         switch (index) {
             case 0 -> {
                 currentEnemy = new Clawdia(780, 150, patternSpawner, player);
-                AudioManager.getInstance().playBGM("/audio/bgm/stage1_clawdia.mp3", true);
+                AudioManager.getInstance().playBGM("/audio/bgm/clawdia_theme.mp3", true);
             }
             case 1 -> {
                 currentEnemy = new Kanaloa(780, 150, patternSpawner, player);
-                AudioManager.getInstance().playBGM("/audio/bgm/stage1_kanaloa.mp3", true);
+                AudioManager.getInstance().playBGM("/audio/bgm/kanaloa_theme.mp3", true);
             }
             case 2 -> {
                 currentEnemy = new Finana(780, 150, patternSpawner, player);
-                AudioManager.getInstance().playBGM("/audio/bgm/stage2_finana.mp3", true);
+                AudioManager.getInstance().playBGM("/audio/bgm/finana_theme.mp3", true);
             }
             case 3 -> {
                 currentEnemy = new Thalasaa(780, 150, patternSpawner, player);
-                AudioManager.getInstance().playBGM("/audio/bgm/stage2_thalasaa.mp3", true);
+                AudioManager.getInstance().playBGM("/audio/bgm/thalassa_theme.mp3", true);
             }
             case 4 -> {
                 currentEnemy = new Skana(780, 150, patternSpawner, player);
-                AudioManager.getInstance().playBGM("/audio/bgm/final_skana.mp3", true);
+                AudioManager.getInstance().playBGM("/audio/bgm/skana_theme.mp3", true);
             }
             default -> {
                 allStagesCleared = true;
