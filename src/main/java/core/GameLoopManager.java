@@ -11,8 +11,7 @@ public class GameLoopManager {
     private final PlayerCharacter playerCharacter;
     private EnemyController enemy;
     private final AnimationTimer timer;
-    private static final double GRAZE_BUFFER = 20.0;
-    private static final double PLAYER_HIT_RADIUS = 6.0;
+    private boolean isPaused = false;
 
     public GameLoopManager(GamePanel gamePanel, PlayerCharacter playerCharacter, EnemyController enemy) {
         this.gamePanel = gamePanel;
@@ -39,6 +38,18 @@ public class GameLoopManager {
         this.enemy = enemy;
     }
 
+    public void setPaused(boolean paused) {
+        this.isPaused = paused;
+    }
+
+    public boolean isPaused() {
+        return isPaused;
+    }
+
+    public void togglePause() {
+        this.isPaused = !this.isPaused;
+    }
+
     public void start() {
         lastTime = 0;
         timer.start();
@@ -49,6 +60,8 @@ public class GameLoopManager {
     }
 
     private void update(double delta) {
+        if (gamePanel.isPaused()) return;
+
         // 1. Sync current enemy from GamePanel (in case StageDirector swapped bosses)
         if (gamePanel.getEnemy() != null) {
             this.enemy = gamePanel.getEnemy();
@@ -71,9 +84,19 @@ public class GameLoopManager {
         // 4. Update GamePanel, StageDirector, and Item Pools
         gamePanel.update(delta);
 
-        // 5. Update Active Boss logic & Orbs
-        if (enemy != null && !enemy.isDead()) {
-            enemy.checkOrbCollisions(playerCharacter);
+        // 5. Update Active Boss logic, Orbs, and Clear Bullets on defeat
+        if (enemy != null) {
+            if (enemy.isDead()) {
+                // The boss just died! Wipe all active enemy bullets off the screen.
+                if (gamePanel.getBulletPool() != null) {
+                    for (Bullet bullet : gamePanel.getBulletPool().getActiveBullets()) {
+                        bullet.setActive(false);
+                    }
+                }
+            } else {
+                // Only check orb collisions if the enemy is actually alive
+                enemy.checkOrbCollisions(playerCharacter);
+            }
         }
 
         // 6. Update Bullet Pools
@@ -93,7 +116,6 @@ public class GameLoopManager {
         // 8. Check Collisions
         checkPlayerBulletCollisions();
         checkEnemyBulletCollisions();
-        checkGrazeEvents();
     }
 
     private void checkPlayerBulletCollisions() {
@@ -120,43 +142,13 @@ public class GameLoopManager {
         for (Bullet bullet : gamePanel.getBulletPool().getActiveBullets()) {
             if (!bullet.isActive()) continue;
 
-            if (isCollidingCircle(bullet, playerCharacter.getHitCenterX(), playerCharacter.getHitCenterY(), PLAYER_HIT_RADIUS)) {
+            if (isCollidingCircle(bullet, playerCharacter.getHitCenterX(), playerCharacter.getHitCenterY(), playerCharacter.getHitRadius())) {
                 playerCharacter.takeDamage(bullet.getDamagePacket().getAmount());
                 bullet.setActive(false);
 
                 // Reset multiplier when player gets hit
                 if (gamePanel.getScoreManager() != null) {
                     gamePanel.getScoreManager().resetMultiplier();
-                }
-            }
-        }
-    }
-
-    private void checkGrazeEvents() {
-        if (playerCharacter == null || playerCharacter.isDead() || gamePanel.getBulletPool() == null) {
-            return;
-        }
-
-        double px = playerCharacter.getX() + playerCharacter.getWidth() / 2;
-        double py = playerCharacter.getY() + playerCharacter.getHeight() / 2;
-
-        for (Bullet bullet : gamePanel.getBulletPool().getActiveBullets()) {
-            if (!bullet.isActive() || bullet.isGrazed()) {
-                continue;
-            }
-
-            double dx = bullet.getX() - px;
-            double dy = bullet.getY() - py;
-            double distance = Math.hypot(dx, dy);
-
-            double hitBoundary = bullet.getRadius() + PLAYER_HIT_RADIUS;
-            double grazeBoundary = hitBoundary + GRAZE_BUFFER;
-
-            if (distance > hitBoundary && distance <= grazeBoundary) {
-                bullet.setGrazed(true);
-                playerCharacter.triggerGrazeFlash();
-                if (gamePanel.getScoreManager() != null) {
-                    gamePanel.getScoreManager().registerGraze();
                 }
             }
         }
