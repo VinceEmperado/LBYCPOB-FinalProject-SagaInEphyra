@@ -12,6 +12,7 @@ public class GameLoopManager {
     private EnemyController enemy;
     private final AnimationTimer timer;
     private static final double GRAZE_BUFFER = 20.0;
+    private static final double PLAYER_HIT_RADIUS = 6.0;
 
     public GameLoopManager(GamePanel gamePanel, PlayerCharacter playerCharacter, EnemyController enemy) {
         this.gamePanel = gamePanel;
@@ -92,6 +93,7 @@ public class GameLoopManager {
         // 8. Check Collisions
         checkPlayerBulletCollisions();
         checkEnemyBulletCollisions();
+        checkGrazeEvents();
     }
 
     private void checkPlayerBulletCollisions() {
@@ -118,7 +120,7 @@ public class GameLoopManager {
         for (Bullet bullet : gamePanel.getBulletPool().getActiveBullets()) {
             if (!bullet.isActive()) continue;
 
-            if (isCollidingCircle(bullet, playerCharacter.getHitCenterX(), playerCharacter.getHitCenterY(), playerCharacter.getHitRadius())) {
+            if (isCollidingCircle(bullet, playerCharacter.getHitCenterX(), playerCharacter.getHitCenterY(), PLAYER_HIT_RADIUS)) {
                 playerCharacter.takeDamage(bullet.getDamagePacket().getAmount());
                 bullet.setActive(false);
 
@@ -147,12 +149,14 @@ public class GameLoopManager {
             double dy = bullet.getY() - py;
             double distance = Math.hypot(dx, dy);
 
-            double grazeRadius = bullet.getRadius() + GRAZE_BUFFER;
+            double hitBoundary = bullet.getRadius() + PLAYER_HIT_RADIUS;
+            double grazeBoundary = hitBoundary + GRAZE_BUFFER;
 
-            if (distance <= grazeRadius) {
+            if (distance > hitBoundary && distance <= grazeBoundary) {
                 bullet.setGrazed(true);
+                playerCharacter.triggerGrazeFlash();
                 if (gamePanel.getScoreManager() != null) {
-                    gamePanel.getScoreManager().resetMultiplier();
+                    gamePanel.getScoreManager().registerGraze();
                 }
             }
         }

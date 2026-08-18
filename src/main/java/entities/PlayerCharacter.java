@@ -33,6 +33,10 @@ public class PlayerCharacter {
     private final double playerBulletSpeed = 600.0;
     private double bulletDamage = 15.0;
 
+    // Graze visual
+    private double grazeFlashTimer = 0.0;
+    private final double grazeFlashDuration = 0.15;
+
     public PlayerCharacter(double startX, double startY) {
         this(startX, startY, 100.0, 3); // Default 100 HP, 3 Lives
     }
@@ -63,6 +67,10 @@ public class PlayerCharacter {
 
         if (invulnerabilityTimer > 0) {
             invulnerabilityTimer -= delta;
+        }
+
+        if (grazeFlashTimer > 0) {
+            grazeFlashTimer -= delta;
         }
 
         this.speed = slowDown ? 180 : 320;
@@ -118,6 +126,10 @@ public class PlayerCharacter {
         this.y = spawnY;
         this.healthSystem.reset();
         this.invulnerabilityTimer = invulnerabilityDuration;
+    }
+
+    public void triggerGrazeFlash() {
+        grazeFlashTimer = grazeFlashDuration;
     }
 
     public double getHealth() {
@@ -182,6 +194,14 @@ public class PlayerCharacter {
             gc.fillOval(getHitCenterX() - hitRadius, getHitCenterY() - hitRadius, hitRadius * 2, hitRadius * 2);
             gc.setFill(Color.WHITE);
             gc.fillOval(getHitCenterX() - (hitRadius / 2.0), getHitCenterY() - (hitRadius / 2.0), hitRadius, hitRadius);
+        }
+
+        // Draws an outline around the player entity whenever a graze happens
+        if (grazeFlashTimer > 0) {
+            double padding = 10.0;
+            gc.setStroke(Color.CYAN);
+            gc.setLineWidth(2.0);
+            gc.strokeRect(x - padding, y - padding, width + padding * 2, height + padding * 2);
         }
     }
 
