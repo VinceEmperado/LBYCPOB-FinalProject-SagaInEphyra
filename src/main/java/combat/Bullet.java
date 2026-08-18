@@ -13,6 +13,7 @@ public class Bullet {
     private Color fallbackColor = Color.RED;
     private DamagePacket damagePacket; // Damage payload field
     private double hitRadius = 3.0;
+    private boolean grazed = false;
 
     public Bullet() {
         this.damagePacket = new DamagePacket(10.0); // Default fallback damage amount
@@ -35,6 +36,7 @@ public class Bullet {
         this.setDamage(damage);
         this.damagePacket.setSourceX(x);
         this.damagePacket.setSourceY(y);
+        this.grazed = false;
     }
 
     public void update(double delta, double panelWidth, double panelHeight) {
@@ -105,4 +107,10 @@ public class Bullet {
     public double getY() { return y; }
     public double getHitRadius() { return hitRadius; }
     public void setHitRadius(double hitRadius) { this.hitRadius = hitRadius; }
+    public boolean isGrazed() {
+        return grazed;
+    }
+    public void setGrazed(boolean grazed) {
+        this.grazed = grazed;
+    }
 }

@@ -5,6 +5,8 @@ public class ScoreManager {
     private long currentScore;
     private long highScore;
     private double multiplier;
+    private static final long GRAZE_POINTS = 10;
+    private static final double GRAZE_MULTIPLIER_BONUS = 0.05;
 
     public ScoreManager() {
         this.currentScore = 0;
@@ -21,6 +23,11 @@ public class ScoreManager {
         if (currentScore > highScore) {
             highScore = currentScore;
         }
+    }
+
+    public void registerGraze() {
+        addScore(GRAZE_POINTS);
+        incrementMultiplier(GRAZE_MULTIPLIER_BONUS);
     }
 
     public void setScore(long score) {
