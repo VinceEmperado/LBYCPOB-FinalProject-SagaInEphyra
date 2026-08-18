@@ -16,7 +16,7 @@ import java.util.Random;
 
 public abstract class EnemyController {
     protected double x, y;
-    protected int width = 120, height = 120;
+    protected int width = 200, height = 180;
 
     protected Image normalSprite;
     protected Image attackSprite;

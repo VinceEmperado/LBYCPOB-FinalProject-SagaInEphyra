@@ -5,31 +5,18 @@ import combat.PatternSpawner;
 import core.AudioManager;
 import entities.PlayerCharacter;
 import ui.DialogueSystem;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
 import java.io.InputStream;
-import java.util.Random;
 
 public class Clawdia extends EnemyController {
 
-    private final Random random = new Random();
     private final HealthSystem healthSystem;
-    private PlayerCharacter player;
-    private DialogueSystem dialogueSystem;
-
     private Image bulletSprite;
-
-    private final double attackDuration = 3.5;
-    private final double teleportWarningDuration = 0.7;
 
     private final double attackIntervalPhase1 = 1.2;
     private final double attackIntervalPhase2 = 0.8;
-
-    private double attackTimer = 0.0;
-    private double currentRotation = 0.0;
-    private boolean isPreparingToTeleport = false;
 
     private double attackCooldown = 0.0;
     private boolean useClawNext = true;
@@ -65,14 +52,6 @@ public class Clawdia extends EnemyController {
         } else {
             System.err.println("Could not load bullet sprite for Clawdia: Resource missing.");
         }
-    }
-
-    public void setPlayer(PlayerCharacter player) {
-        this.player = player;
-    }
-
-    public void setDialogueSystem(DialogueSystem dialogueSystem) {
-        this.dialogueSystem = dialogueSystem;
     }
 
     @Override
@@ -141,31 +120,8 @@ public class Clawdia extends EnemyController {
 
         checkPhaseTransition();
 
-        attackTimer += delta;
-
-        if (attackTimer >= attackDuration && attackTimer < (attackDuration + teleportWarningDuration)) {
-            isPreparingToTeleport = true;
-            currentRotation += 720 * delta;
-        }
-        else if (attackTimer >= (attackDuration + teleportWarningDuration)) {
-            int minX = 80;
-            int maxX = Math.max(minX + 1, (int) panelWidth - width - 80);
-            int minY = 60;
-            int maxY = Math.max(minY + 1, (int) (panelHeight * 0.35) - height);
-
-            x = minX + random.nextInt(maxX - minX + 1);
-            y = minY + random.nextInt(maxY - minY + 1);
-
-            attackTimer = 0;
-            isPreparingToTeleport = false;
-            currentRotation = 0.0;
-        }
-        else {
-            isPreparingToTeleport = false;
-            currentRotation = 0.0;
-
+        if (currentState == State.ATTACKING) {
             attackCooldown += delta;
-
             double currentInterval = (currentPhase == 1) ? attackIntervalPhase1 : attackIntervalPhase2;
 
             if (attackCooldown >= currentInterval) {
@@ -212,25 +168,5 @@ public class Clawdia extends EnemyController {
                 centerX, centerY, bulletCount,
                 speed, arcAngle, player, bulletSprite, Color.RED
         );
-    }
-
-    @Override
-    protected void renderSprite(GraphicsContext gc) {
-        if (isDead()) return;
-
-        gc.save();
-
-        if (isPreparingToTeleport) {
-            double pivotX = x + (width / 2.0);
-            double pivotY = y + (height / 2.0);
-
-            gc.translate(pivotX, pivotY);
-            gc.rotate(currentRotation);
-            gc.translate(-pivotX, -pivotY);
-        }
-
-        super.renderSprite(gc);
-
-        gc.restore();
     }
 }
