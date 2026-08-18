@@ -45,6 +45,8 @@ public class Finana extends EnemyController {
         this.player = player;
         this.dialogueSystem = dialogueSystem;
         this.healthSystem = new HealthSystem(maxHealth);
+        this.maxHealth = maxHealth;
+        this.currentHealth = maxHealth;
 
         InputStream spriteStream = getClass().getResourceAsStream("/sprites/bullets/fin.png");
         if (spriteStream != null) {
@@ -67,12 +69,15 @@ public class Finana extends EnemyController {
         return "You can't outswim the current!";
     }
 
+    @Override
     public void takeDamage(double amount) {
         healthSystem.takeDamage(amount);
+        this.currentHealth = healthSystem.getCurrentHealth();
         AudioManager.getInstance().playSFX("/audio/sfx/boss_hit.mp3");
         checkPhaseTransition();
     }
 
+    @Override
     public boolean isDead() {
         return healthSystem.isDead();
     }

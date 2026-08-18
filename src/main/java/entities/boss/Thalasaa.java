@@ -43,6 +43,8 @@ public class Thalasaa extends EnemyController {
         this.player = player;
         this.dialogueSystem = dialogueSystem;
         this.healthSystem = new HealthSystem(maxHealth);
+        this.maxHealth = maxHealth;
+        this.currentHealth = maxHealth;
 
         InputStream spriteStream = getClass().getResourceAsStream("/sprites/bullets/bubble.png");
         if (spriteStream != null) {
@@ -65,12 +67,15 @@ public class Thalasaa extends EnemyController {
         return "Drown beneath the pressure of the endless deep!";
     }
 
+    @Override
     public void takeDamage(double amount) {
         healthSystem.takeDamage(amount);
+        this.currentHealth = healthSystem.getCurrentHealth();
         AudioManager.getInstance().playSFX("/audio/sfx/boss_hit.mp3");
         checkPhaseTransition();
     }
 
+    @Override
     public boolean isDead() {
         return healthSystem.isDead();
     }
