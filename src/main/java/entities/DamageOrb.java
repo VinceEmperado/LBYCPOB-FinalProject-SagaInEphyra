@@ -14,8 +14,7 @@ public class DamageOrb {
         this.x = x;
         this.y = y;
 
-        // Randomly rolls damage between 3 and 10
-        this.damageAmount = random.nextInt(8) + 3;
+        this.damageAmount = random.nextInt(31) + 30;
     }
 
     public void render(GraphicsContext gc) {

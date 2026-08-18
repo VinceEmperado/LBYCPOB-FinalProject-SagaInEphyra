@@ -39,7 +39,7 @@ public abstract class EnemyController {
 
     protected int currentPhase = 1;
     protected double survivalTimer = 0.0;
-    protected double phaseOneDuration = 10.0;
+    protected double phaseOneDuration = 60.0;
 
     protected double maxHealth = 500.0;
     protected double currentHealth = 500.0;

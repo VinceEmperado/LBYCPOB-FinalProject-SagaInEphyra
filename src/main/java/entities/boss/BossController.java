@@ -15,7 +15,7 @@ public abstract class BossController extends EnemyController {
     protected HealthSystem healthSystem;
     protected String bossName = "Boss";
 
-    protected double phaseTwoDuration = 15.0;
+    protected double phaseTwoDuration = 60.0;
 
     // UPDATED: Now takes both normal and attack image paths
     public BossController(double startX, double startY, String normalImagePath, String attackImagePath, double maxHealth,
@@ -27,7 +27,7 @@ public abstract class BossController extends EnemyController {
         this.healthSystem = new HealthSystem(maxHealth);
         this.maxHealth = maxHealth;
         this.currentHealth = maxHealth;
-        this.phaseOneDuration = 15.0;
+        this.phaseOneDuration = 60.0;
         this.dialogueDuration = 4.0;
     }
 
